@@ -1,90 +1,115 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-    <link rel="stylesheet" type="text/css" href="../themes/default/easyui.css">
-    <script type="text/javascript" src="../js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="../jquery.easyui.min.js"></script>
-    <script src="../locale/easyui-lang-zh_CN.js"></script>
-</head>
-<body>
+<div style="padding: 2px;height: 100%;box-sizing: border-box" >
+    <table id="testTable"></table>
+    <div id="testTable-tb" style="height:auto">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="append_aaaa()">添加</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeit_aaaa()">删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" onclick="accept_aaaa()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-undo',plain:true" onclick="reject_aaaa()">退出编辑</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" onclick="getChanges_aaaa()">获取编辑数量</a>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        $("#testTable").datagrid({
+            title:"测试编辑表",
+            data:[
+                {"equipment":"钢包车","equipmentType":"钢包车","num":"1","unit":"套","weight":"17000.00 ","totalWeight":"17000.00 ","initPrice":"142158.43 "},
+                {"equipment":"中间包车","equipmentType":"中间包车","num":"1","unit":"套","weight":"11300.00 ","totalWeight":"11300.00 ","initPrice":"109778.60 "},
+                {"equipment":"中间包","equipmentType":"中间包","num":"5","unit":"个","weight":"2460.00 ","totalWeight":"12300.00 ","initPrice":"86007.38 "},
+                {"equipment":"中间包","equipmentType":"中间包胎模","num":"1","unit":"付","weight":"675.00 ","totalWeight":"675.00 ","initPrice":"5392.78 "},
+                {"equipment":"旋转操作箱支撑装置","equipmentType":"悬挂操作箱支撑装置","num":"2","unit":"套","weight":"191.40 ","totalWeight":"382.80 ","initPrice":"4424.84 "},
+                {"equipment":"溢流摆槽","equipmentType":"溢流摆槽","num":"2","unit":"套","weight":"196.40 ","totalWeight":"392.80 ","initPrice":"2927.34 "},
+                {"equipment":"结晶器","equipmentType":"结晶器120x120-900","num":"4","unit":"套","weight":"593.00 ","totalWeight":"2372.00 ","initPrice":"56118.19 "},
+                {"equipment":"结晶器","equipmentType":"结晶器外罩","num":"2","unit":"套","weight":"225.00 ","totalWeight":"450.00 ","initPrice":"3256.26 "},
+                {"equipment":"结晶器","equipmentType":"结晶器维修架","num":"1","unit":"台","weight":"175.00 ","totalWeight":"175.00 ","initPrice":"1468.29 "},
+                {"equipment":"振动装置","equipmentType":"结晶器振动装置","num":"2","unit":"台","weight":"2100.00 ","totalWeight":"4200.00 ","initPrice":"65539.34 "},
 
-</body>
-<script>
-    $.extend($.fn.validatebox.defaults.rules, {
-        phone : {//手机号码校验
-            validator: function(value, param){
-                return checkPhone(value);
-            },
-            message: '请输入正确的手机号码。'
-        },
-        myEmail : {//邮箱校验，避免使用email和默认的冲突
-            validator: function(value, param){
-                return checkEmail(value);
-            },
-            message: '请输入正确的邮箱'
-        },
-        loginName : {//登录名，数字、英文字母或者下划线
-            validator: function(value, param){
-                return checkLoginName(value);
-            },
-            message: '只能输入数字、英文字母或者下划线'
-        },
-        telePhone : {//座机，区号及分机号可有可无
-            validator: function(value, param){
-                return checkTelePhone(value);
-            },
-            message: '请输入正确的座机号码'
-        },
-        chinese : {//
-            validator: function(value, param){
-                return checkChinese(value);
-            },
-            message: '只能输入中文汉字'
-        },
-        number : {//正整数，包括0（00，01非数字）
-            validator: function(value, param){
-                return isNumber(value);
-            },
-            message: '只能输入数字（01非数字）'
-        },
-        numberText : {//数字组成的字符串，如000222，22220000，00000
-            validator: function(value, param){
-                return isNumberText(value);
-            },
-            message: '只能输入数字字符串'
-        },
-        idCardNo : {//身份证
-            validator: function(value, param){
-                return isIdCardNo(value);
-            },
-            message: '请输入正确的身份证号码'
-        },
-        money : {//金额
-            validator: function(value, param){
-                return isFloat(value);
-            },
-            message: '请输入正确的数字'
-        },
-        floatNumber : {//数字（包括正整数、0、浮点数）
-            validator: function(value, param){
-                return isFloat(value);
-            },
-            message: '请输入正确的数字'
-        },
-        minLength: {
-            validator: function(value, param){
-                return value.length >= param[0];
-            },
-            message: '请输入至少 {0}个字符。'
-        },
-        maxLength: {
-            validator: function(value, param){
-                return value.length <= param[0];
-            },
-            message: '不能输入超过{0}个字符。'
-        }
+            ],
+            columns:[[
+                {field:'equipment',title:'设备名称',width:$(this).width() * 0.2,align: "center", editor: {
+                    type: 'combobox',
+                    options: {
+                        valueField: 'type_id',
+                        textField: 'name',
+                        data:[
+                            {"type_id":"钢包车","name":"钢包车"},
+                            {"type_id":"中间包车","name":"中间包车"},
+                            {"type_id":"中间包","name":"中间包"},
+                            {"type_id":"旋转操作箱支撑装置","name":"旋转操作箱支撑装置"},
+                            {"type_id":"溢流摆槽","name":"溢流摆槽"},
+                            {"type_id":"结晶器","name":"结晶器"},
+                            {"type_id":"振动装置","name":"振动装置"}
+                        ],
+                        required: true,
+                        panelHeight:'auto'
+                    }
+                }},
+                {field: 'equipmentType', title: '型号', width: $(this).width() * 0.2, align: "center",editor:{type:'textbox',options:{required: true}}},
+                {field:'num',title:'数量',width:$(this).width() * 0.2,align: "center",editor:{type:'numberbox',options:{required: true}}},
+                {field:'unit',title:'单位',width:$(this).width() * 0.2,align: "center",editor:{type:'textbox',options:{required: true}}},
+                {field:'weight',title:'图纸上理论单重/kg',width:$(this).width() * 0.2,align: "center",editor:{type:'numberbox',options:{precision:2,required: true}}},
+                {field:'totalWeight',title:'图纸上理论总重/kg',width:$(this).width() * 0.2,align: "center",editor:{type:'numberbox',options:{precision:2,required: true}}},
+                {field:'initPrice',title:'成本/元',width:$(this).width() * 0.2,align: "center",editor:{type:'numberbox',options:{precision:2,required: true}}}
+            ]],
+            onClickRow: onClickRow,
+            toolbar: '#testTable-tb',
+            singleSelect: true
+        });
     });
+
+
+    var editIndex_aaaa = undefined;
+    function endEditing(){
+        if (editIndex_aaaa == undefined){return true}
+        if ($('#testTable').datagrid('validateRow', editIndex_aaaa)){//验证行
+            var ed = $('#testTable').datagrid('getEditor', {index:editIndex_aaaa,field:'equipment'});
+            var productname = $(ed.target).combobox('getText');
+          /*  $(ed.target).combobox('setValue');*/
+            $('#testTable').datagrid('getRows')[editIndex_aaaa]['productname'] = productname;
+            console.log(productname);
+            $('#testTable').datagrid('endEdit', editIndex_aaaa);
+            editIndex_aaaa = undefined;
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function onClickRow(index){
+        if (editIndex_aaaa != index){
+            if (endEditing()){
+                $('#testTable').datagrid('selectRow', index)
+                        .datagrid('beginEdit', index);
+                editIndex_aaaa = index;
+            } else {
+                $('#testTable').datagrid('selectRow', editIndex_aaaa);
+            }
+        }
+    }
+    function append_aaaa(){
+        if (endEditing()){
+            $('#testTable').datagrid('appendRow',{status:'P'});
+            editIndex_aaaa = $('#testTable').datagrid('getRows').length-1;
+            $('#testTable').datagrid('selectRow', editIndex_aaaa)
+                    .datagrid('beginEdit', editIndex_aaaa);
+        }
+    }
+    function removeit_aaaa(){
+        if (editIndex_aaaa == undefined){return}
+        $('#testTable').datagrid('cancelEdit', editIndex_aaaa)
+                .datagrid('deleteRow', editIndex_aaaa);
+        editIndex_aaaa = undefined;
+    }
+    function accept_aaaa(){
+        if (endEditing()){
+            $('#testTable').datagrid('acceptChanges');
+        }
+    }
+    function reject_aaaa(){
+        $('#testTable').datagrid('rejectChanges');
+        editIndex_aaaa = undefined;
+    }
+    function getChanges_aaaa(){
+        var rows = $('#testTable').datagrid('getChanges');
+        $.messager.alert('我的消息', rows.length+' 行被编辑!', 'info');
+    }
 </script>
-</html>

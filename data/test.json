@@ -1,0 +1,13 @@
+[
+    {"equipment":"钢包车","equipmentType":"钢包车","num":"1","unit":"套","weight":"17000.00 ","totalWeight":"17000.00 ","initPrice":"142158.43 "},
+    {"equipment":"中间包车","equipmentType":"中间包车","num":"1","unit":"套","weight":"11300.00 ","totalWeight":"11300.00 ","initPrice":"109778.60 "},
+    {"equipment":"中间包","equipmentType":"中间包","num":"5","unit":"个","weight":"2460.00 ","totalWeight":"12300.00 ","initPrice":"86007.38 "},
+    {"equipment":"中间包","equipmentType":"中间包胎模","num":"1","unit":"付","weight":"675.00 ","totalWeight":"675.00 ","initPrice":"5392.78 "},
+    {"equipment":"旋转操作箱支撑装置","equipmentType":"悬挂操作箱支撑装置","num":"2","unit":"套","weight":"191.40 ","totalWeight":"382.80 ","initPrice":"4424.84 "},
+    {"equipment":"溢流摆槽","equipmentType":"溢流摆槽","num":"2","unit":"套","weight":"196.40 ","totalWeight":"392.80 ","initPrice":"2927.34 "},
+    {"equipment":"结晶器","equipmentType":"结晶器120x120-900","num":"4","unit":"套","weight":"593.00 ","totalWeight":"2372.00 ","initPrice":"56118.19 "},
+    {"equipment":"结晶器","equipmentType":"结晶器外罩","num":"2","unit":"套","weight":"225.00 ","totalWeight":"450.00 ","initPrice":"3256.26 "},
+    {"equipment":"结晶器","equipmentType":"结晶器维修架","num":"1","unit":"台","weight":"175.00 ","totalWeight":"175.00 ","initPrice":"1468.29 "},
+    {"equipment":"振动装置","equipmentType":"结晶器振动装置","num":"2","unit":"台","weight":"2100.00 ","totalWeight":"4200.00 ","initPrice":"65539.34 "},
+
+]
