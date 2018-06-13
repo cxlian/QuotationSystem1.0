@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN">
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>反馈</title>
+    <link href="../../plugins/ionic-v1.3.3/css/ionic.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="plugins/toast/css/toast.css"/>
+    <script src="../../plugins/ionic-v1.3.3/js/ionic.min.js"></script>
+    <script src="../../plugins/jquery-1.11.1.min.js"></script>
+    <script src="plugins/toast/js/toast.js"></script>
+    <script src="js/public.js"></script>
+</head>
+<style>
+    body{background-color:#f5f5f5}
+    .my-left{font-size:34px;color:#116099;padding-left:6px;z-index: 1000;width: 34px;height: 34px;}
+    .my-content{height:343px;background-color:#fff}
+    .item span{display:block}
+    .item .my-title{margin-bottom:6px}
+    .item p{padding:4px 0}
+    .item b{font-weight:400}
+    .bottom{position:fixed;bottom:10px;left:50%;margin-left:-60px}
+    .bottom a{color:#fff;font-size:16px;text-decoration:none;display:inline-block;background-color:#e96e58;padding:4px 40px;border-radius:20px}
+    textarea{width:100%}
+    input[type=radio]+label::before{content:"\a0";display:inline-block;vertical-align:middle;font-size:18px;width:1em;height:1em;margin-right:.4em;border-radius:50%;border:1px solid #ccc;text-indent:.15em;line-height:1;margin-top:-4px}
+    input[type=radio]:checked+label::before{background-color:#e96e58;background-clip:content-box;border-color:#e96e58;padding:.2em}
+    input[type=radio]{position:absolute;clip:rect(0,0,0,0)}
+</style>
+<body>
+
+<!--<div class="bar bar-header">
+    <i class="icon ion-ios-arrow-left my-left"></i>
+    <h1 class="title">反馈</h1>
+</div>-->
+
+<div class="content">
+    <div class="my-content">
+        <ul class="list">
+            <li class="item">
+                <span class="my-title">请选择反馈类型</span>
+                <p><input type="radio" name="mytype" value="1" id="rdo0"/><label for="rdo0">功能异常：功能故障或不能用</label></p>
+                <p><input type="radio" name="mytype" value="2" id="rdo1"/><label for="rdo1">产品建议：用的不爽，我有建议</label></p>
+                <p><input type="radio" name="mytype" value="3" id="rdo2"/><label for="rdo2">其他问题</label></p>
+            </li>
+            <li class="item">
+                <span class="my-title">意见和说明</span>
+                <textarea name="" class="mysuggest" cols="30" rows="3" placeholder="请补充详细意见和说明"></textarea>
+            </li>
+            <li class="item">
+                <span class="my-title">具体描述</span>
+                <textarea name="" class="mycontent" cols="30" rows="3" placeholder="请输入不少于12个字的描述"></textarea>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom">
+    <a href="javascript:void(0);" class="submit">提&nbsp;&nbsp;交</a>
+</div>
+
+</body>
+
+<script>
+$(function(){
+
+    function showtoastFromDocumentCenter(str){
+        showMessage(str,2000,true);
+    }
+
+    $(".my-left").click(function(){
+        window.history.go(-1);
+    });
+
+    mytoken=getQueryString('token');
+    console.log(mytoken);
+    $(".submit").click(function(){
+
+        var type=$("input[name='mytype']:checked").val();
+        var suggest=$(".mysuggest").val();
+        var content=$(".mycontent").val();
+        if(!type){
+            showtoastFromDocumentCenter("请选择反馈类型");
+            return false;
+        }else if(!suggest){
+            showtoastFromDocumentCenter("请填写意见和说明");
+            return false;
+        }else if(!content){
+            showtoastFromDocumentCenter("请填写具体描述");
+            return false;
+        }else{
+            $.ajax({
+                type: "POST",
+                url:"//192.168.9.50:8080/appService/Import_Add_Feedback",
+                data: {
+                    'token':mytoken,
+                    'type':type,
+                    'suggest':suggest,
+                    'content':content
+                },
+                dataType: "json",
+                success: function (data) {
+                    if (data.code === 0) {
+                        showtoastFromDocumentCenter("成功");
+                    }else{
+                        showtoastFromDocumentCenter("失败，请重新尝试");
+                    }
+                }
+            });
+        }
+    });
+
+});
+</script>

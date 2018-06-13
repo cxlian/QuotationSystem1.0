@@ -1,0 +1,426 @@
+
+
+<div id="cc" class="easyui-layout" style="height: 100%;">
+    <div data-options="region:'west',title:'电炉设备列表',split:true,border:false,collapsible:false" style="width:170px;">
+        <div class="tool-sb" style="padding:5px 0;text-align: center">
+            <a href="javascript:append2()" class="easyui-linkbutton" >添加</a>
+            <a href="javascript:edit2();" class="easyui-linkbutton" >修改</a>
+            <a href="javascript:remove2();" class="easyui-linkbutton" >删除</a>
+        </div>
+        <ul id="tt-dlsb"></ul><!--树:电炉设备列表-->
+    </div>
+    <div data-options="region:'center',title:'连铸型号列表',split:true,border:false,noheader:true" style="padding:5px;">
+        <div style="height: 100%;">
+            <div id="tool-dlsb" style="padding:5px;">
+                <div>
+                    <a href="javascript:append()" id="append" class="easyui-linkbutton" plain="true" iconCls="icon-add">添加型号</a>
+                    <a href="javascript:edit();" class="easyui-linkbutton" plain="true" iconCls="icon-edit">修改型号</a>
+                    <a href="javascript:remove();" class="easyui-linkbutton" plain="true" iconCls="icon-remove">删除型号</a>
+                </div>
+                <div style="padding:5px 0 5px 7px;color:#333;">
+                    按设备查找： <select name="" id="key-dlsb" class="textbox" style="width: 110px">
+                    <option value="9999">全部</option>
+                </select>
+                    &nbsp;&nbsp;&nbsp;&nbsp;按型号查找：<input type="text" id="key-dlxh" class="textbox" name="user" style="width:110px">
+                    <a href="javascript:search_btn();" class="easyui-linkbutton" iconCls="icon-search">查询</a>
+                </div>
+            </div>
+            <table id="tb-dlsb" style="width: 100%"></table>
+        </div>
+    </div>
+</div>
+
+<!--新增窗口-->
+<div id="win-add-dlxh" style="display: none">
+    <div style="padding: 40px 5px;">
+        <div style="display: none">
+            <div>设备ID： <span class="id"></span></div>
+            <div>设备名称： <span class="name"></span></div>
+            <div>设备位置： <span class="position"></span></div>
+        </div>
+        技术型号： <input type="text" class="type"/>
+        <br/> <br/>
+        设备单位： <input type="text" class="unit"/>
+        <br/> <br/>
+        技术特点： <input type="text" class="technology"/>
+        <br/> <br/>
+        工艺参数： <input type="text" class="parameter"/>
+        <br/> <br/>
+        设备单重： <input type="text" class="weight"/>
+    </div>
+</div>
+
+<!--修改窗口-->
+<div id="win-edit-dlxh" style="display: none">
+    <div style="padding: 40px 5px;">
+        <div style="display: none">
+            <div>设备ID： <span class="id"></span></div>
+            <div>设备名称： <span class="name"></span></div>
+            <div>设备位置： <span class="position"></span></div>
+        </div>
+        技术型号： <input type="text" class="type"/>
+        <br/> <br/>
+        设备单位： <input type="text" class="unit"/>
+        <br/> <br/>
+        技术特点： <input type="text" class="technology"/>
+        <br/> <br/>
+        工艺参数： <input type="text" class="parameter"/>
+        <br/> <br/>
+        设备单重： <input type="text" class="weight"/>
+    </div>
+</div>
+
+<!--新增窗口-->
+<div id="add-dlsb" style="display: none">
+    <div style="padding: 40px 5px;">
+        <p>设备名称： <input type="text" class="equipName"/></p>
+        <p>设备位置： <select name="" class="equipPosition">
+            <option value="0">线内</option>
+            <option value="1">线外</option>
+        </select></p>
+    </div>
+</div>
+
+<!--修改窗口-->
+<div id="edit-dlsb" style="display: none">
+    <div style="padding: 40px 5px;">
+        <p>设备名称： <input type="text" class="equipName"/></p>
+        <p>设备位置： <select name="" class="equipPosition">
+            <option value="0">线内</option>
+            <option value="1">线外</option>
+        </select></p>
+
+    </div>
+</div>
+<script src="../js/public.js"></script>
+<script>
+var editIndex = undefined;
+var editIndex2 = undefined;
+
+function append2(){
+    $('#add-dlsb').dialog({closed: false});
+}
+
+function append() {//点击新增按钮
+    if ($("#key-dlsb").val() >6666) {
+        $.messager.alert('我的消息', '请先选择一个设备！', 'error');
+    } else {
+        $('#win-add-dlxh').dialog({closed: false});
+    }
+}
+
+function edit2(){//点击修改设备按钮
+    if (editIndex2 == undefined) {
+        $.messager.alert('我的消息', '请先选择一条设备信息！', 'error');
+        return;
+    } else {
+        /*console.log("弹出修改窗口");*/
+       // console.log(editIndex2);
+        $('#edit-dlsb').dialog({closed: false});
+    }
+}
+
+function edit() {//点击修改按钮
+    var node = $('#tb-dlsb').datagrid('getSelected');
+    if (node){
+        $('#win-edit-dlxh').dialog({closed: false});
+    }else{
+        $.messager.alert('我的消息', '请先选择一条要修改的型号信息！', 'error');
+    }
+}
+
+function remove() {//点击删除按钮
+    var node = $('#tb-dlsb').datagrid('getSelected');
+    if (node){
+        $('#tb-dlsb').datagrid('deleteRow',  $("#tb-dlsb").datagrid("getRowIndex",$("#tb-dlsb").datagrid("getSelected")));
+        $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+    }else{
+        $.messager.alert('我的消息', '请先选择一条要删除的型号信息！', 'error');
+    }
+    /*if (editIndex == undefined) {
+        $.messager.alert('我的消息', '请先选择一条职位信息！', 'error');
+    } else {
+        $.messager.confirm('确认对话框', '您确定要删除吗？', function (r) {
+            if (r) {
+                //发起添加请求
+                $.post(REQUEST_URL + "Import_DELETE_Equipment_Version", {
+                            versionId: $('#tb-lzsb').datagrid('getSelected').versionId,
+                            token: TOKEN
+                        },
+                        function (data) {
+                            $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                            $('#tb-lzsb').datagrid('reload');//刷新数据
+                            editIndex = undefined;
+                        }
+                );
+            }
+        });
+    }*/
+}
+
+function remove2() {//点击删除按钮
+    var node = $('#tt-dlsb').tree('getSelected');
+    if (node){
+        $('#tt-dlsb').tree('remove',  node.target);
+        $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+    }else{
+        $.messager.alert('我的消息', '请先选择一条要删除的设备信息！', 'error');
+    }
+}
+
+
+$(function(){
+
+    function nowRow(index) {
+        if (editIndex != index) {
+            $('#zw').datagrid('selectRow', index);
+            editIndex = index;
+        }
+    }
+
+    $("#tb-dlsb").datagrid({
+        url: "../data/dlsbxh.json",//表格数据
+        onClickRow: nowRow,//点击执行
+        onDblClickRow:edit,//双击执行
+        toolbar: "#tool-dlsb",//工具栏
+        title: "型号列表",//标题
+        columns: [
+            [
+                {field: "versionId", title: "型号ID",width:100,align: "center"},
+                {field: "equipmentName", title: "设备名称",width:100,align: "center"},
+                {field: "equipmentTypeName", title: "型号", width:100, align: "center"},
+                {field: "lineType", title: "位置",width:50,  align: "center"},
+                {field: "paramter", title: "工艺参数",  width:100, align: "center"},
+                {field: "equipmentWeight", title: "重量",width:50, align: "center"},
+                {field: "unit", title: "单位", width:50, align: "center"},
+                {field: "technology", title: "技术特点", width:50, align: "center",hidden:true},
+                {field: "createTime", title: "添加时间",width:100, align: "center"}
+            ]
+        ]
+    });
+
+    function search_lzsb() {//据设备搜索型号
+        var content;
+
+        if ($('#key-lzsb:eq(0)').val() < 6666) {
+            content = $('#key-lzsb').val();
+        } else {
+            content = undefined;
+        }
+        $("#tb-lzsb").datagrid({//设置职位表格
+            url: REQUEST_URL + 'Get_Continuous_Casting_Equipment_List',//表格数据
+            method: "get",
+            queryParams: {
+                equipmentId: content
+            }
+        });
+
+    }
+
+    $('#key-dlsb').change(function () {//下拉框变化时执行
+        if ($(this).val() < 6666) {
+            var select_node = $('#tt-dlsb').tree('find', $(this).val());
+            $('#tt-dlsb').tree('select', select_node.target);
+        }else{
+            //选择全部，列表无选择
+            $("#tt-dlsb").find(".tree-node").removeClass("tree-node-selected");
+        }
+    });
+
+
+
+        $('#tt-dlsb').tree({//设置树
+            url: "../data/dlsblb.json",//数据
+            onClick: function (node) {
+                $("#key-dlsb").val(node.id);
+                editIndex2=node;
+            },
+            onLoadSuccess:function(node,data){
+                for (var i = 0; i < data.length; i++) {//设置下拉框
+                    $("#key-dlsb").append("<option value='" + data[i].id + "'>" + data[i].text + "</option>");
+                }
+            }
+        });
+
+    function add_xh() {//增加字段
+        $('#tb-dlsb').datagrid('insertRow',{
+            index: 0,	// 索引从0开始
+            row: {
+                "versionId":10,
+                "unit":$("#win-add-dlxh .unit").val(),
+                "equipmentTypeName":$("#win-add-dlxh .technology").val(),
+                "equipmentWeight":$("#win-add-dlxh .weight").val(),
+                "createTime":nowData(),
+                "paramter":$("#win-add-dlxh .parameter").val(),
+                "lineType":$("#win-add-dlxh .position").html(),
+                "equipmentName":$("#win-add-dlxh .name").html(),
+                "technology":$("#win-add-dlxh .technology").val(),
+                "equipmentId":$("#win-add-dlxh .id").html()
+            }
+        });
+        $.messager.alert('我的消息', '添加成功！', 'info');//弹出信息
+        $('#win-add-dlxh').dialog({closed: true});
+    }
+
+    $('#win-add-dlxh').dialog({//设置新增窗口
+        title: '新增型号',
+        width: 350,
+        height: 350,
+        closed: true,
+        modal: true,
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                  //  console.log("点击保存");
+                    add_xh();//增加
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-add-dlxh').dialog({closed: true});
+                }
+            }
+        ],
+        onOpen:function(){
+            $('#win-add-dlxh .name').html($("#key-dlsb option:selected").html());
+            var select_node = $('#tt-dlsb').tree('find', $("#key-dlsb").val());
+            if(select_node.lineType==0){
+                $("#win-add-dlxh .position").html("线内");
+            }else{
+                $("#win-add-dlxh .position").html("线外");
+            }
+            $("#win-add-dlxh .id").html(select_node.id);
+        }
+    });
+
+    function save_xh() {//保存修改的数据
+        $('#tb-dlsb').datagrid('updateRow',{
+            index: $("#tb-dlsb").datagrid("getRowIndex",$("#tb-dlsb").datagrid("getSelected")),
+            row: {
+                "unit":$('#win-edit-dlxh .unit').val(),
+                "equipmentTypeName":$('#win-edit-dlxh .type').val(),
+                "equipmentWeight": $('#win-edit-dlxh .weight').val(),
+                "paramter":$('#win-edit-dlxh .parameter').val(),
+                "technology":$('#win-edit-dlxh .technology').val()
+            }
+        });
+        $('#win-edit-dlxh').dialog({closed: true});//关闭弹窗
+        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+    }
+
+    function save() {//保存修改的电炉设备
+        //发起添加请求
+        var node = $('#tt-dlsb').tree('getSelected');
+        if (node){
+            $('#tt-dlsb').tree('update', {
+                target: node.target,
+                text: $("#edit-dlsb .equipName").val(),
+                attributes:{
+                    lineType:$("#edit-dlsb .equipPosition").val()
+                }
+            });
+        }
+        $('#edit-dlsb').dialog({closed: true});//关闭弹窗
+        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+    }
+
+    function save_tj(){
+            $('#tt-dlsb').tree('append', {
+                data: [{
+                    id: 6,
+                    text: $("#add-dlsb .equipName").val(),
+                    attributes:{
+                        lineType:$("#add-dlsb .equipPosition").val()
+                    }
+                }]
+            });
+        $('#add-dlsb').dialog({closed: true});//关闭弹窗
+        $.messager.alert('我的消息', '添加成功！', 'info');//弹出信息
+    }
+
+    $('#win-edit-dlxh').dialog({//设置修改窗口
+        title: '修改型号',
+        width: 350,
+        height: 350,
+        closed: true,
+        //  cache: false,
+        //  href: 'get_content.php',
+        modal: true,
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    /*  console.log("点击保存");*/
+                    save_xh();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-edit-dlxh').dialog({closed: true});
+                }
+            }
+        ],
+        onOpen: function () {
+            $('#win-edit-dlxh .id').html($('#tb-dlsb').datagrid('getSelected').equipmentId);
+            $('#win-edit-dlxh .name').html($('#tb-dlsb').datagrid('getSelected').equipmentName);
+            $('#win-edit-dlxh .position').html($('#tb-dlsb').datagrid('getSelected').lineType);
+            $('#win-edit-dlxh .type').val($('#tb-dlsb').datagrid('getSelected').equipmentTypeName);
+            $('#win-edit-dlxh .unit').val($('#tb-dlsb').datagrid('getSelected').unit);
+            $('#win-edit-dlxh .technology').val($('#tb-dlsb').datagrid('getSelected').technology);
+            $('#win-edit-dlxh .parameter').val($('#tb-dlsb').datagrid('getSelected').paramter);
+            $('#win-edit-dlxh .weight').val($('#tb-dlsb').datagrid('getSelected').equipmentWeight);
+        }
+    });
+
+    $('#edit-dlsb').dialog({//设置修改设备窗口
+        title: '修改电炉设备',
+        width: 350,
+        height: 250,
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    /*  console.log("点击保存");*/
+                    save();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#edit-dlsb').dialog({closed: true});
+                }
+            }
+        ],
+        onOpen: function () {
+            $('#edit-dlsb .equipName').val(editIndex2.text);
+            $('#edit-dlsb .equipPosition').val(editIndex2.attributes.lineType);
+        }
+    });
+
+    $('#add-dlsb').dialog({//设置修改设备窗口
+        title: '添加电炉设备',
+        width: 350,
+        height: 250,
+        closed: true,
+        modal: true,
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    save_tj();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#add-dlsb').dialog({closed: true});
+                }
+            }
+        ]
+    });
+});
+
+</script>

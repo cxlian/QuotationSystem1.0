@@ -1,0 +1,248 @@
+<style>
+    #tt .tree-file{background:url(../themes/icons/zong.png) no-repeat 0 0}
+</style>
+
+<div class="easyui-layout" style="height: 100%;">
+    <div data-options="region:'west',title:'LEFT',collapsible:false,border:false,noheader:true"
+         style="width:180px;padding:2px">
+        <div class="easyui-panel fl" title="全部部门" style="width:176px;height:100%;padding:10px;">
+            <ul id="tt"></ul>
+        </div>
+    </div>
+
+    <div data-options="region:'center',title:'RIGHT',collapsible:false,border:false,noheader:true"
+         style="padding:2px;">
+        <div id="tool-zw" style="padding:5px;">
+            <div>
+                <a href="javascript:void(0)" class="easyui-linkbutton append" plain="true" iconCls="icon-myadd">添加</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton edit" plain="true" iconCls="icon-myedit">修改</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton remove" plain="true" iconCls="icon-myremove">删除</a>
+            </div>
+            <div style="padding:5px 0 5px 7px;color:#333;">
+                查询部门： <select name="" id="key-zw" class="textbox" style="width: 110px">
+                <option value="9999">全部</option>
+            </select>
+            </div>
+        </div>
+        <table id="zw" style="width: 100%;box-sizing: border-box"></table>
+    </div>
+</div>
+
+<!--新增职位窗口-->
+<div id="win-add-zw"></div>
+
+<!--修改窗口-->
+<div id="win-edit-zw"></div>
+
+<script>
+$(function() {
+    $("#tool-zw .append").click(function(){
+        //做个判断，如果没有选择部门不弹窗
+        if ($("#key-zw").val() >6666) {
+            $.messager.alert('我的消息', '请先选择一个部门！', 'error');
+        } else {
+            $('#win-add-zw').dialog({closed: false});
+            $("#new").val("");
+        }
+    });
+
+    $("#tool-zw .edit").click(function(){
+        var selectMsg = $('#zw').datagrid('getSelected');
+        if(!selectMsg){
+            $.messager.alert('我的消息', '请先选择一条职位信息！', 'error');
+            return;
+        }else{
+            $('#win-edit-zw').dialog({closed: false});
+        }
+    });
+    console.log("TOKEN:"+TOKEN);
+    console.log("REQUEST_URL:"+REQUEST_URL);
+
+    $("#tool-zw .remove").click(function(){
+        var selectMsg = $('#zw').datagrid('getSelected');
+        if(!selectMsg){
+            $.messager.alert('我的消息', '请先选择一条职位信息！', 'error');
+            return;
+        }else{
+            $.messager.confirm('确认对话框', '您确定要删除吗？', function (r) {
+                if (r) {
+                    //发起添加请求
+                    $.get(REQUEST_URL + "Delete_Position", {
+                                positionID: $('#zw').datagrid('getSelected').id,
+                                token: TOKEN
+                            },
+                            function (data) {
+                                if (data.errorDesc == "操作成功") {
+                                    $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                                    $('#zw').datagrid('reload');//刷新数据
+                                }
+                            }
+                    );
+                }
+            });
+        }
+    });
+
+    $("#zw").datagrid({//设置职位表格
+        url: REQUEST_URL + 'Get_Position_List',//表格数据
+        method: "get",
+        queryParams: {
+            token:TOKEN
+        },
+        title: "职位列表",//标题
+        toolbar: "#tool-zw",//工具栏
+        columns: [
+            [
+                {field: "id", title: "职位ID", width: 100, align: "center",hidden:true},
+                {field: "position", title: "职位名称", width: 100, align: "center"},
+                {field: "dept_id", title: "部门ID", width: 100, align: "center",hidden:true},
+                {field: "deptName", title: "部门名称", width: 100, align: "center"}
+            ]
+        ]
+    });
+
+    function search_zw() {//搜索职位
+        /* console.log("搜索职位");*/
+        var content;
+
+        if ($('#key-zw:eq(0)').val() < 6666) {
+            content = $('#key-zw').val();
+        } else {
+            content = undefined;
+        }
+        $("#zw").datagrid({//设置职位表格
+            url: REQUEST_URL + 'Get_Position_List',//表格数据
+            method: "get",
+            queryParams: {
+                departmentID: content
+            }
+        });
+
+    }
+
+    $.get(REQUEST_URL + 'Get_Department_List', {
+        token: TOKEN
+    }, function (data) {
+        $('#tt').tree({//设置部门树
+            data: data.rows,//数据
+            onClick: function (node) {
+                // console.log(node);  // 在用户点击的时候提示
+                $("#key-zw").val(node.id);
+                search_zw();
+            }
+        });
+        for (var i = 0; i < data.rows.length; i++) {//设置下拉框
+            $("#key-zw").append("<option value='" + data.rows[i].id + "'>" + data.rows[i].deptName + "</option>");
+        }
+    });
+
+
+
+    $('#key-zw').change(function () {//下拉框变化时执行
+        if ($(this).val() < 6666) {
+            var select_node = $('#tt').tree('find', $(this).val());
+            $('#tt').tree('select', select_node.target);
+        }else{
+            //选择全部，列表无选择
+            $("#tt").find(".tree-node").removeClass("tree-node-selected");
+        }
+        search_zw();
+    });
+
+
+
+
+    function add() {//增加字段
+        var node = $('#tt').tree('getSelected');
+        var form = $('#win-add-zw form');//获取表单
+        if (form.form("validate")) {
+            $.ajax({
+                type: "POST",
+                url: REQUEST_URL + "Import_Add_Position",
+                data: $.param({
+                    'token': TOKEN,
+                    'departmentID': node.id
+                }) + '&' + form.serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.errorDesc == "操作成功") {
+                        $('#win-add-zw').dialog({closed: true});//关闭弹窗
+                        $.messager.alert('我的消息', '新增成功！', 'info');//弹出信息
+                        $('#zw').datagrid('reload');//刷新数据
+                    }
+                }
+            });
+        }
+    }
+
+    $('#win-add-zw').dialog({//设置新增窗口
+        title: '新增',
+        width: 370,
+        heigh:120,
+        href:"src/win-add-zw.html",
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    add();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-add-zw').dialog({closed: true});
+                }
+            }
+        ]
+    });
+
+    $('#win-edit-zw').dialog({//设置修改窗口
+        title: '修改',
+        width: 370,
+        heigh:120,
+        href:"src/win-edit-zw.html",
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    save();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-edit-zw').dialog({closed: true});
+                }
+            }
+        ]
+    });
+
+
+
+
+    function save() {
+        var selectMsg = $('#zw').datagrid('getSelected');//获取行
+        var form = $('#win-edit-zw form');//获取表单
+        if (form.form("validate")) {
+            $.ajax({
+                type: "POST",
+                url: REQUEST_URL + "Import_Update_Position",
+                data: $.param({
+                    'token': TOKEN,
+                    'id': selectMsg.id,
+                    'departmentID': selectMsg.dept_id
+                }) + '&' + form.serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.errorDesc == "操作成功") {
+                        $('#win-edit-zw').dialog({closed: true});//关闭弹窗
+                        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                        $('#zw').datagrid('reload');//刷新数据
+                    }
+                }
+            });
+        }
+    }
+});
+</script>
+

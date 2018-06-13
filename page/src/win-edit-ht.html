@@ -1,0 +1,238 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">合同ID</label>
+            <input required="true" class="easyui-textbox contractID" name="contractID" type="text" disabled="disabled"/>
+        </div>
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">客户</label>
+                <!--    <input required="true" class="easyui-combobox customerId" name="customerID" type="text" data-options="valueField: 'value',
+                textField: 'label',method:'get',url:REQUEST_URL+'Get_Customer_List?text=',panelHeight:'auto'"/>-->
+                <input required="true" class="easyui-combobox customerId" name="customerID" type="text"/>
+            </div>
+            <div class="form-column">
+                <label class="required">签约时间</label>
+                <input required="true" class="easyui-datebox contractTime" name="contractTime" type="text"/>
+            </div>
+        </div>
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">合同编号</label>
+                <input required="true" class="easyui-textbox contractNo" name="" type="text" disabled="disabled"/>
+            </div>
+            <div class="form-column">
+                <label class="required">合同金额</label>
+                <input class="easyui-numberbox contractAmount" name="contractAmount" type="text"/>
+            </div>
+        </div>
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">合同状态</label>
+                <select class="easyui-combobox customerProgress" name="customerProgress"
+                        data-options="panelHeight:'auto'">
+                    <option value="0">未启动</option>
+                    <option value="1">跟进中</option>
+                    <option value="2">报价中</option>
+                    <option value="3">签约</option>
+                    <option value="4">完成</option>
+                    <option value="5">异常状态</option>
+                </select>
+            </div>
+            <div class="form-column">
+                <label class="required">回款金额</label>
+                <input class="easyui-numberbox receiveAmount" name="receiveAmount" type="text"/>
+            </div>
+        </div>
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">未开票金额</label>
+                <input class="easyui-numberbox noReceiveAmount" name="noReceiveAmount" type="text"/>
+            </div>
+            <div class="form-column">
+                <label class="required">负责人</label>
+                <input required="true" class="easyui-textbox ownerName" name="" type="text" disabled="disabled"/>
+            </div>
+        </div>
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">下次跟进时间</label>
+                <input required="true" class="easyui-datebox nextTime" name="nextTime" type="text"/>
+            </div>
+            <div class="form-column">
+                <label>备注</label>
+                <input class="easyui-textbox remark" name="remark" data-options="validType:'maxLength[250]'"
+                       type="text"/>
+            </div>
+        </div>
+        <div class="form-line" style="height: auto;margin-top: 16px;">
+            <label>图片</label>
+
+            <input type="file" title="请选择图片" id="file" multiple
+                   accept="image/png,image/jpg,image/gif,image/JPEG"/>
+            <!--    <a id="btn">上传</a>-->
+            <div id="imgBox"></div>
+        </div>
+    </div>
+</form>
+
+<div style="width:100%;text-align: center;">
+    <a href="javascript:void (0)" class="easyui-linkbutton" id="btn" style="width: 100px;margin-top: 20px">保存</a>
+</div>
+<script>
+
+    /*
+     * 删除图片
+     * @param id:图片id
+     * */
+    function removeImageInit($this, id) {
+        //本地移除
+        $this.remove();
+        //服务器移除
+        $.ajax({
+            type: "post",
+            url: REQUEST_URL + "import_delete_img",
+            data: {
+                id: id
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 0) {
+                    $.messager.alert('我的消息', '删除成功！', 'error');//弹出信息
+                } else {
+                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                }
+            }
+        });
+    }
+    $(function () {
+        imgSrc = [];//清空图片
+        imgFile = [];//清空文件流
+
+        var selectMsg = $('#tb-htlb').datagrid('getSelected');
+
+        $.ajax({
+            type: "get",
+            url: REQUEST_URL + "Get_Contract",
+            data: {
+                id: selectMsg.id
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 0) {
+                    initData(data.result);
+                    imgUpload({
+                        inputId: 'file', //input框id
+                        imgBox: 'imgBox', //图片容器id
+                        buttonId: 'btn', //提交按钮id
+                        upUrl: REQUEST_URL + "Import_update_Contract",  //提交地址
+                        data: 'fi`le1', //参数名
+                        initImgBox: $("#imgBox").html(),
+                        table: 'tb-htlb',//表格ID
+                        num: "9"//上传个数
+                    });
+                } else {
+                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                }
+            }
+        });
+
+        $(".customerId").combobox({
+            valueField: "value",
+            textField: "label",
+            method: "get",
+            url: REQUEST_URL + 'Get_Customer_List?customerId=' + selectMsg.customerId,
+            panelHeight: 'auto'
+        });
+
+        $('.noReceiveAmount,.receiveAmount,.contractAmount').numberbox({
+            required: true,
+            min: 0,
+            max: 100000000,
+            precision: 2,
+            missingMessage: "请输入数字，格式X.XX"
+        });
+
+
+
+        $("#btn").click(function () {
+            var form = $('form');//获取表单
+            setData("form input");
+        });
+
+        function initData(array) {
+            $('.contractID').textbox("setValue", array.contractId);//合同ID
+            $('.customerId').combobox("setValue", array.customerId);//客户ID
+            $('.contractTime').datebox("setValue", array.pactTime);//签约时间
+            $('.contractNo').textbox("setValue", array.contractNo);///合同编号
+            $(".contractAmount").numberbox("setValue", array.contractAmount);//合同金额
+            $(".customerProgress").combobox("setValue", array.customerProgress);//合同状态
+            $(".receiveAmount").numberbox("setValue", array.receiveAmount);//回款金额
+            $(".noReceiveAmount").numberbox("setValue", array.noReceiveAmount);//未开票金额
+            $(".ownerName").textbox("setValue", array.ownerName);//负责人
+            $('.nextTime').datebox("setValue", array.nextTime);//下次跟进时间
+            $('.remark').textbox("setValue", array.remark);//备注
+            showImages(array.files);//图片
+        }
+
+        function showImages(obj) {
+            var str = "";
+            for (var a = 0; a < obj.length; a++) {
+                if (obj[a].imgUrl) {
+                    str += '<div class="imgContainer"><img  src="' + obj[a].imgUrl + '" onclick="imgDisplay(this)"><p onclick="removeImageInit($(this).parent(),' + obj[a].id + ')" class="imgDelete">×</p></div>';
+                }
+            }
+            $("#imgBox").html(str);
+        }
+
+
+        /*     imgSrc = [];//清空图片
+         imgFile = [];//清空文件流
+
+         function showImages(obj) {
+         var str = "";
+         for (var a = 0; a < obj.length; a++) {
+         if (obj[a].imgUrl) {
+         str += '<div class="imgContainer"><img  src="' + obj[a].imgUrl + '" onclick="imgDisplay(this)"><p onclick="removeImageInit($(this).parent(),' + obj[a].id + ')" class="imgDelete">合同</p></div>';
+         }
+         }
+         $("#imgBox").html(str);
+         }
+
+         var selectMsg = $('#tb-htlb').datagrid('getSelected');
+
+         $(".customerId").combobox({
+         valueField: "value",
+         textField: "label",
+         method: "get",
+         url: REQUEST_URL + 'Get_Customer_List?customerId=' + selectMsg.customerId,
+         panelHeight: 'auto'
+         });
+
+
+
+         imgUpload({
+         inputId: 'file', //input框id
+         imgBox: 'imgBox', //图片容器id
+         buttonId: 'btn', //提交按钮id
+         upUrl: REQUEST_URL + "Import_update_Contract",  //提交地址
+         data: 'fi`le1', //参数名
+         initImgBox: $("#imgBox").html(),
+         table: 'tb-htlb',//表格ID
+         num: "9"//上传个数
+         });
+
+         $('.noReceiveAmount,.receiveAmount,.contractAmount').numberbox({
+         required: true,
+         min: 0,
+         max: 100000000,
+         precision: 2,
+         missingMessage: "请输入数字"
+         });
+
+         $("#btn").click(function () {
+         var form = $('form');//获取表单
+         setData("form input");
+         });*/
+    });
+</script>

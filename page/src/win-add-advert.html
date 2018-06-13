@@ -1,0 +1,88 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">项目名称</label>
+                <input required="true" class="easyui-textbox" data-options="validType:'maxLength[100]'" name="companyName" type="text"/>
+            </div>
+            <div class="form-column">
+                    <label class="required">流数</label>
+                    <input required="true"  class="easyui-numberbox easyui-textbox "  name="pipelineNumber" missingMessage="值范围:0~10"  data-options="min:0,max:10,precision:0" type="text"  />
+            </div>
+        </div>
+            <div class="form-line">
+                <div class="form-column">
+                    <label class="required">弧度</label>
+                    <input required="true" class="easyui-numberbox" missingMessage="值范围:0.00~99.99" data-options="min:0,max:99.99,precision:2" name="radianNumber" type="text"/>
+                </div>
+                <div class="form-column">
+                        <label class="required">钢种</label>
+                        <input required="true" class="easyui-textbox" name="steelGrade" type="text"/>
+                </div>
+            </div>
+            <div class="form-line">
+                <div class="form-column">
+                    <label class="required">断面</label>
+                    <input required="true" class="easyui-textbox" name="section" type="text"/>
+                </div>
+                <div class="form-column">
+                        <label class="required">定尺</label>
+                        <input required="true" class="easyui-textbox" name="steelSize" type="text"/>
+                </div>
+            </div>
+            <div class="form-line" style="height: auto;margin-top: 16px;">
+                <label class="required">图片</label>
+
+                <input type="file" title="请选择图片" id="file" multiple
+                       accept="image/png,image/jpg,image/gif,image/JPEG"/>
+                <!--    <a id="btn">上传</a>-->
+                <div id="imgBox"></div>
+            </div>
+    </div>
+</form>
+
+<div style="width:100%;text-align: center;">
+    <a href="javascript:void (0)" class="easyui-linkbutton" id="btn" style="width: 100px;margin-top: 20px">保存</a>
+</div>
+
+<script>
+
+    $(function(){
+
+        $.extend($.fn.validatebox.defaults.rules, {//添加验证规则
+            number: {//value值为文本框中的值
+                validator: function (value) {
+                    var reg = /^\d+(\.\d+)?$/;
+                    return reg.test(value);
+                },
+                message: '提示信息.'
+            }
+        });
+        imgSrc=[];//清空图片
+
+        $("form").form("clear");
+
+        $("#btn").click(function() {
+            var form = $('form');//获取表单
+
+                setData("form input");
+
+        });
+
+        imgUpload({
+            inputId: 'file', //input框id
+            imgBox: 'imgBox', //图片容器id
+            buttonId: 'btn', //提交按钮id
+            upUrl: REQUEST_URL + "import_advert",  //提交地址
+            initImgBox:$("#imgBox").html(),//初始数据
+            table:'advertList',//表格ID
+            data: 'fi`le1', //参数名
+            num: "9"//上传个数
+        });
+
+
+
+    });
+
+
+</script>

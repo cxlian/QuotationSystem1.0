@@ -1,0 +1,233 @@
+
+
+
+
+<div style="padding: 2px;height: 100%;box-sizing: border-box" >
+    <div id="tool-htlb" style="padding:5px;">
+        <div>
+            <a href="javascript:void(0)"  class="easyui-linkbutton append" plain="true" iconCls="icon-myadd">添加</a>
+          <!--  <a href="javascript:void(0);" class="easyui-linkbutton edit" plain="true" iconCls="icon-edit">修改</a>-->
+            <a href="javascript:void(0);" class="easyui-linkbutton remove" plain="true" iconCls="icon-myremove">删除</a>
+        </div>
+
+    </div>
+    <table id="tb-htlb"></table>
+</div>
+
+<!--新增窗口-->
+<!--<div id="win-add-ht"></div>-->
+
+<!--修改窗口-->
+<div id="win-edit-ht"></div>
+
+<script>
+/*function ww4(date) {
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    var d = date.getDate();
+    var h = date.getHours();
+    var m2 = date.getMinutes();
+    var s = date.getSeconds();
+    return  y + '-' + (m < 10 ? ('0' + m) : m) + '-' + (d < 10 ? ('0' + d) : d) + ' ' + (h < 10 ? ('0' + h) : h) + ':' + (m2 < 10 ? ('0' + m2) : m2) + ':' + (s < 10 ? ('0' + s) : s);
+
+}
+function w4(s) {
+    var reg = /[\u4e00-\u9fa5]/  //利用正则表达式分隔
+    var ss = (s.split(reg));
+    var y = parseInt(ss[0], 10);
+    var m = parseInt(ss[1], 10);
+    var d = parseInt(ss[2], 10);
+    var h = parseInt(ss[3], 10);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d) && !isNaN(h)) {
+        return new Date(y, m - 1, d, h);
+    } else {
+        return new Date();
+    }
+}*/
+
+var editIndex = undefined;
+
+
+function edit() {//点击修改按钮
+    if (editIndex == undefined) {
+        $.messager.alert('我的消息', '请先选择一条记录！', 'error');
+        return;
+    } else {
+        /*  console.log("弹出修改窗口")*/
+        $('#edit').dialog({closed: false});
+        var selectMsg = $('#tb').datagrid('getSelected');
+        $("#mod").val(selectMsg.deptName);
+        /*     console.log('选中的值'+selectMsg.deptName);
+         console.log('选中的ID'+selectMsg.id);*/
+    }
+}
+
+function seeContract() {
+    dialog = $("<div/>").dialog({
+        title: '合同详情',
+        width: 700,
+        height: 560,
+        closed: false,
+        href: 'src/win-edit-ht.html',
+        onClose: function () {
+            $(this).dialog("destroy");
+        }
+    });
+}
+
+    $(function () {
+        //点击新增合同
+        $("#tool-htlb .append").click(function () {
+            dialog = $("<div/>").dialog({
+                title: '添加合同',
+                width: 500,
+                height: 520,
+                closed: false,
+                href: 'src/win-add-ht.html',
+                onClose: function () {
+                    $(this).dialog("destroy");
+                    imgFile=[];//图片清空
+                }
+            });
+        });
+
+        //点击删除合同
+        $("#tool-htlb .remove").click(function(){
+            var node = $('#tb-htlb').datagrid('getSelected');
+            if (node){
+                $.post(REQUEST_URL+"Delete_Contract",{
+                    token:TOKEN,
+                    contractID:node.id
+                },function(data){
+                    if(data.errorDesc=="操作成功"){
+                        $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                        $('#tb-htlb').datagrid('reload');//刷新数据
+                    }
+                });
+            }else{
+                $.messager.alert('我的消息', '请先选择一条要删除的合同信息！', 'error');
+            }
+        });
+
+        //点击修改合同
+        $("#tool-htlb .edit").click(function(){
+            var node = $('#tb-htlb').datagrid('getSelected');
+            if (node) {
+                $('#win-edit-ht').dialog({closed: false});
+            }else{
+                $.messager.alert('我的消息', '请先选择一条要修改的合同信息！', 'error');
+            }
+        });
+
+
+        function nowRow(index) {
+            if (editIndex != index) {
+                $('#tb').datagrid('selectRow', index);
+                editIndex = index;
+            }
+        }
+
+        $("#tb-htlb").datagrid({
+            title: "合同列表",//标题
+            url: REQUEST_URL + 'Get_Contract_List',//表格数据
+            method: "get",
+            queryParams: {
+                token:TOKEN
+            },
+            toolbar: "#tool-htlb",//工具栏
+            columns: [
+                [
+                    {field: "id", title: "id", width: 100, align: "center",hidden:true},
+                    {field: "contractNo", title: "合同编号", width: 100, align: "center"},
+                    {field: "customerName", title: "客户", width: 100, align: "center"},
+                    {field: "customerProgress", title: "合同状态", width: 100, align: "center",formatter: function (value) {
+                        if(value==0) return "未启动";
+                        if(value==1) return "跟进中";
+                        if(value==2) return "报价中";
+                        if(value==3) return "签约";
+                        if(value==4) return "完成";
+                        if(value==5) return "异常状态";
+                    }},
+                    {field: "contractAmount", title: "合同金额", width: 100, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "receiveAmount", title: "回款金额", width: 100, align: "center",formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "noReceiveAmount", title: "未开票金额", width: 100, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "nextTime", title: "下次跟进时间", width: 100, align: "center",
+                        formatter: function(value){return timeStampString(value)}},
+                    {field:"_operate",title: "操作",width:100,align:"center",formatter:function(val,row,index){
+                        return '<a href="javascript:;" style="color: #0000ff;font-size: 12px;" onclick="seeContract('+index+')">查看</a>'
+                    }}
+                ]
+            ]
+        });
+
+        function add_ht() {//增加字段
+            var form = $('#win-add-ht form');//获取表单
+            if (form.form("validate")) {
+                $.ajax({
+                    type: "POST",
+                    url: REQUEST_URL + "Import_Add_Contract",
+                    crossDomain: true,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    data: $.param({
+                        'token': TOKEN
+                    }) + '&' + form.serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.errorDesc == "操作成功") {
+                            $('#win-add-ht').dialog({closed: true});//关闭弹窗
+                            $.messager.alert('我的消息', '新增成功！', 'info');//弹出信息
+                            $('#tb-htlb').datagrid('reload');//刷新数据
+                        }
+                    }
+                });
+            }
+        }
+
+        function save() {//保存修改的数据
+            var selectMsg = $('#tb-htlb').datagrid('getSelected');
+            $.ajax({
+                type: "POST",
+                url:REQUEST_URL+"Import_update_Contract",
+                data: $.param({
+                    'token':TOKEN,
+                    'contractID':selectMsg.id,
+                    'customerID':selectMsg.customerId
+                }) + '&' + $('#win-edit-ht form').serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if(data.errorDesc=="操作成功"){
+                        $('#win-edit-ht').dialog({closed: true});//关闭弹窗
+                        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                        $('#tb-htlb').datagrid('reload');//刷新数据
+                    }
+                }
+            });
+        }
+
+        $('#win-edit-ht').dialog({//设置修改窗口
+            title: '修改合同',
+            href:'src/win-edit-ht.html',
+            width: 400,
+            height: 500,
+            buttons: [
+                {
+                    text: '保存',
+                    handler: function () {
+                        save();
+                    }
+                },
+                {
+                    text: '关闭',
+                    handler: function () {
+                        $('#win-edit-ht').dialog({closed: true});
+                    }
+                }
+            ]
+        });
+
+
+    });
+</script>
+

@@ -1,0 +1,15 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">部门名称</label>
+            <input required="true" class="easyui-textbox departmentName" name="departmentName" data-options="validType:'maxLength[100]'" type="text"/>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(function(){
+        var selectMsg = $('#tb').datagrid('getSelected');
+        $("#win-edit-bm .departmentName").val(selectMsg.deptName);
+    });
+</script>

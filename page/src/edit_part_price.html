@@ -1,0 +1,28 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label for="price" class="required">价格</label>
+            <input id="price" required="true" class="easyui-textbox price" type="text"/>
+        </div>
+        <div class="form-line">
+            <label for="because" class="required">修改原因</label>
+            <input id="because" required="true" class="easyui-textbox because" type="text"/>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(function(){
+        /*初始化表格*/
+        var selectMsg = $('#tb-pjlb').datagrid('getSelected');
+        $("#win-edit-pj .parkId").html(selectMsg.id);
+        $("#win-edit-pj .price").val(selectMsg.price);
+        $('.price').numberbox({
+            required : true,
+            min:0,
+            max:100000000,
+            precision:2,
+            missingMessage:"请输入数字"
+        });
+    });
+</script>

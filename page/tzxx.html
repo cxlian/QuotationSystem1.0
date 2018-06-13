@@ -1,0 +1,139 @@
+<div style="padding: 2px;height: 100%;box-sizing: border-box">
+    <div id="tool-noticeList" style="padding:5px;">
+        <div>
+            <a href="javascript:void(0);" class="easyui-linkbutton append" plain="true" iconCls="icon-myadd">添加</a>
+        </div>
+        <div style="padding:5px 0 5px 7px;color:#333;">
+            按部门查找： <input class="select" name="dept" >
+        </div>
+    </div>
+    <table id="noticeList"></table>
+</div>
+
+<!--新增通知窗口-->
+<div id="win-add-tz"></div>
+
+<script>
+    $(function(){
+
+        //按部门搜索通知
+        function searchNotice(record){
+            if(record.id<9999){
+                $("#noticeList").datagrid({
+                    url: REQUEST_URL + 'get_list_notice',
+                    method: "get",
+                    queryParams:{
+                        token:TOKEN,
+                        deptId:record.id
+                    }
+                });
+            }else{
+                $("#noticeList").datagrid({
+                    url: REQUEST_URL + 'get_list_notice',
+                    method: "get",
+                    queryParams:{
+                        token:TOKEN
+                    }
+                });
+            }
+        }
+
+        $.ajax({
+            type: "get",
+            url: REQUEST_URL + "Get_Department_List",
+            dataType: "json",
+            success: function (data) {
+                if (data.errorDesc == "操作成功") {
+                    var deptData = [{
+                        "id": 9999,
+                        "text": "全部"
+                    }];
+                    for (var i = 0; i < data.rows.length; i++) {
+                        deptData.push(data.rows[i]);
+                    }
+                    $('#tool-noticeList .select').combobox({
+                        data:deptData,
+                        valueField:'id',
+                        textField:'text',
+                        panelHeight:'auto',
+                        onSelect:searchNotice,
+                        onLoadSuccess:function(){ //默认选中第一条数据
+                            var data= $(this).combobox("getData");
+                            if (data.length > 0) {
+                                $('#tool-noticeList .select').combobox('select', data[0].id);
+                            }
+                        }
+                    });
+
+                }
+            }
+        });
+
+
+        $("#tool-noticeList .append").click(function () {
+            $('#win-add-tz').dialog({closed: false});
+        });
+        $('#win-add-tz').dialog({
+            title: '添加',
+            width: 550,
+            height: 400,
+            href:'src/win-add-tz.html',
+            buttons: [
+                {
+                    text: '保存',
+                    handler: function () {
+                        save();
+                    }
+                },
+                {
+                    text: '关闭',
+                    handler: function () {
+                        $('#win-add-tz').dialog({closed: true});
+                    }
+                }
+            ]
+        });
+
+        function   save(){
+            var form = $('#win-add-tz form');//获取表单
+            if (form.form("validate")) {
+                $.ajax({
+                    type: "POST",
+                    url: REQUEST_URL + "Import_Add_Notice",
+                    data: $.param({
+                        'token': TOKEN
+                    }) + '&' + form.serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.errorDesc == "操作成功") {
+                            $('#win-add-tz').dialog({closed: true});//关闭弹窗
+                            $('#noticeList').datagrid('reload');//刷新数据
+                            $.messager.alert('我的消息', '发送成功！', 'info');//弹出信息
+                        }
+                    }
+                });
+            }
+        }
+
+        $("#noticeList").datagrid({
+            url: REQUEST_URL + 'get_list_notice',
+            method: "get",
+            queryParams:{
+                token:TOKEN
+            },
+            title: "通知列表",
+            toolbar: "#tool-noticeList",
+            columns: [
+                [
+                    {field: "deptName", title: "接收者", width: 100, align: "center"},
+                    {field: "title", title: "标题", width: 100, align: "center"},
+                    {field: "deptId", title: "部门ID", width: 100, align: "center",hidden:true},
+                    {field: "id", title: "ID", width: 100, align: "center",hidden:true},
+                    {field: "contents", title: "通知内容", width: 200, align: "center"},
+                    {field: "time", title: "推送时间", width: 100, align: "center",
+                        formatter: function(value){return timeStamp2String(value);}}
+                ]
+            ]
+        });
+    })
+</script>

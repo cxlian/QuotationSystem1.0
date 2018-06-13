@@ -1,0 +1,28 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">发送对象</label>
+            <input required="true" class="easyui-combobox" name="deptId" type="text" data-options="valueField: 'id',
+		textField: 'text',method:'get',url:REQUEST_URL +'get_Department_Dictionary',panelHeight:'auto'"/>
+        </div>
+        <div class="form-line">
+            <label class="required">发送时间</label>
+            <input required="true" class="easyui-datetimebox" name="time" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">发送标题</label>
+            <input required="true" class="easyui-validatebox textbox" data-options="validType:'maxLength[100]'"  name="title" type="text" style="width: 300px;"/>
+        </div>
+        <div class="form-line">
+            <label class="required">发送内容</label>
+            <input required="true" class="easyui-textbox" data-options="multiline:true," name="content" type="text"  style="height:100px;width: 300px;"/>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(function(){
+        $("#win-add-tz form").form("clear");
+    });
+
+</script>

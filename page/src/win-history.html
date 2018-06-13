@@ -1,0 +1,69 @@
+<table id="historyPrice"></table>
+
+<script>
+    $(function(){
+        var node = $('#tb-pjlb').datagrid('getSelected');
+        if($.cookie('role')==0){//如果是管理员
+            $('#historyPrice').datagrid({
+                url:REQUEST_URL + "Get_Continuous_Casting_Park_List",
+                queryParams:{
+                    token:TOKEN,
+                    status:0,
+                    equipmentId:node.equipmentId,
+                    parkId:node.id
+                },
+                method:"get",
+                pageSize : 10,
+                pageList: [10, 20, 30, 40, 50],
+                columns:[[
+                    {field:'parkName',title:'配件名称',width:$(this).width() * 0.2,align: "center"},
+                    {field:'equipmentName',title:'设备',width:$(this).width() * 0.2, align: "center"},
+                    {field:'materialStandard',title:'材料',width:$(this).width() * 0.2, align: "center"},
+                    {field:'unit',title:'单位',width:$(this).width() * 0.2,align: "center"},
+                    {field:'minTradeRatio',title:'最低系数',width:$(this).width() * 0.2, align: "center"},
+                    {field:'minTradePrice',title:'最低价格',width:$(this).width() * 0.2, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field:'normalTradeRatio',title:'正常交易系数',width:$(this).width() * 0.2, align: "center"},
+                    {field:'normalTradePrice',title:'正常交易价格',width:$(this).width() * 0.2,align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field:'productDetail',title:'生产厂商通用情况',width:$(this).width() * 0.2,align: "center"},
+                    {field:'remark',title:'备注',width:$(this).width() * 0.2, align: "center"},
+                    {field:'price',title:'单价成本',width:$(this).width() * 0.2,align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field:'because',title:'修改原因',width:$(this).width() * 0.2, align: "center"},
+                    {field:'createTime',title:'创建时间',width:$(this).width() * 0.2, align: "center",
+                        formatter: function(value){return timeStamp2String(value);}},
+                    {field:'equipmentId',title:'equipmentId',width:$(this).width() * 0.2, align: "center",hidden:true},
+                    {field:'id',title:'id', align: "center",width:$(this).width() * 0.2,hidden:true},
+                    {field:'priceId',title:'priceId', width:$(this).width() * 0.2,align: "center",hidden:true}
+                ]]
+            });
+        }else{
+            $('#historyPrice').datagrid({
+                url:REQUEST_URL + "Get_Continuous_Casting_Park_List",
+                queryParams:{
+                    token:TOKEN,
+                    status:0,
+                    equipmentId:node.equipmentId,
+                    parkId:node.id
+                },
+                method:"get",
+                pageSize : 10,
+                pageList: [10, 20, 30, 40, 50],
+                columns:[[
+                    {field:'parkName',title:'配件名称',width:$(this).width() * 0.2,align: "center"},
+                    {field:'equipmentName',title:'设备',width:$(this).width() * 0.2, align: "center"},
+                    {field:'materialStandard',title:'材料',width:$(this).width() * 0.2, align: "center"},
+                    {field:'unit',title:'单位',width:$(this).width() * 0.2,align: "center"},
+                    {field:'productDetail',width:$(this).width() * 0.2,title:'生产厂商通用情况',align: "center"},
+                    {field:'remark',title:'备注',width:$(this).width() * 0.2, align: "center"},
+                    {field:'price',title:'单价成本',width:$(this).width() * 0.2,align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field:'because',title:'修改原因',width:$(this).width() * 0.2, align: "center"},
+                    {field:'createTime',title:'创建时间',width:$(this).width() * 0.2, align: "center",
+                        formatter: function(value){return timeStamp2String(value);}},
+                    {field:'equipmentId',title:'equipmentId',width:$(this).width() * 0.2, align: "center",hidden:true},
+                    {field:'id',title:'id', align: "center",hidden:true},
+                    {field:'priceId',title:'priceId', align: "center",hidden:true}
+                ]]
+            });
+        }
+
+    });
+</script>

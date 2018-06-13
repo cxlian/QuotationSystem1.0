@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <!-- easyui-->
+    <link rel="stylesheet" type="text/css" href="../themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../css/index.css">
+    <link rel="stylesheet" href="../css/layer.css">
+    <link rel="SHORTCUT ICON" href="../images/icon.png">
+
+    <script type="text/javascript" src="../jquery.min.js"></script>
+    <script type="text/javascript" src="../js/jquery.cookie.js"></script>
+</head>
+<style>
+    #new-nav .tree li{padding: 4px 0;}
+
+</style>
+<body class="easyui-layout">
+<div data-options="region:'north',split:true,noheader:true" style="height:67px;background:#666;">
+   <!-- <div class="logo">后台管理系统</div>
+    <div class="logout">您好，admin! | <a href="javascript:login_out();">退出</a></div>-->
+    <div class="mainTop">
+        <div class="center">
+            <div class="logo"></div>
+            <div class="title">圣力智能后台管理系统</div>
+            <div class="logout">欢迎您，
+                <span class="role"></span>&nbsp;-&nbsp;<span class="user"></span> | <a href="javascript:login_out();">注销</a></div>
+        </div>
+    </div>
+</div>
+<div data-options="region:'south',split:true,noheader:true" style="height:60px;line-height:50px;text-align:center;">
+    © 2018 Powered by 福建圣力智能工业科技股份有限公司.
+</div>
+
+<div data-options="region:'west',title:'导航菜单',split:true" style="width:200px;">
+    <div id="new-nav" class="easyui-accordion" data-options="border:false" style="height: 100%;">
+        <div title="报价管理" data-options="iconCls:'icon-price',selected:true">
+            <ul id="bjgl"></ul>
+        </div>
+     <!--   <div class="noAdmin">-->
+            <div title="系统管理" data-options="iconCls:'icon-set'">
+                <ul id="xtgl"></ul>
+            </div>
+            <div title="通知管理" data-options="iconCls:'icon-notice'">
+                <ul id="tzgl"></ul>
+            </div>
+            <div title="问题反馈" data-options="iconCls:'icon-problem'">
+                <ul id="wtgl"></ul>
+            </div>
+<!--        </div>-->
+    </div>
+</div>
+
+<div data-options="region:'center'" style="overflow: hidden;">
+    <div id="tabs"></div>
+</div>
+
+<div id="mm" class="easyui-menu" style="width:180px;display: none">
+    <div id="mm-tabclose">关闭</div>
+    <div id="mm-tabcloseall">全部关闭</div>
+    <div id="mm-tabcloseother">除此之外全部关闭</div>
+    <div class="menu-sep"></div>
+    <div id="mm-tabcloseright">当前页右侧全部关闭</div>
+    <div id="mm-tabcloseleft">当前页左侧全部关闭</div>
+    <div class="menu-sep"></div>
+    <div id="mm-exit">退出</div>
+</div>
+</body>
+
+<script type="text/javascript" src="../jquery.easyui.min.js"></script>
+<script src="../locale/easyui-lang-zh_CN.js"></script>
+<script src="../js/layer.js"></script>
+<script type="text/javascript" src="../js/index.js"></script>
+<script type="text/javascript" src="../js/public.js"></script>
+<script src="../js/uploadImg.js" type="text/javascript"></script>
+<script src="../js/datagrid-detailview.js"></script>
+<script>
+
+
+    if(!$.cookie('id')){
+        location.href='../page/login.html';
+    }
+
+    /*** 执行退出 ***/
+    function login_out(){
+        $.messager.confirm('确认对话框', '确定要退出吗？', function (r) {
+            if (r) {
+                location.href='../page/login.html';
+                clearCookie();
+            }
+        });
+    }
+
+    /*** 设置全局TOKEN ***/
+    TOKEN=$.cookie('token');
+
+    /*** 设置用户名 ***/
+    $(".logout .user").html($.cookie('name'));
+    if($.cookie('role')==2) $(".logout .role").html("生产员");
+    if($.cookie('role')==1) $(".logout .role").html("销售员");
+    if($.cookie('role')==0) $(".logout .role").html("管理员");
+
+
+
+    $(function () {
+        <!--判断是否为管理员-->
+        if ($.cookie('role') == 1 || $.cookie('role') == 2) {//如果是销售员
+            $("#new-nav").accordion("remove", "问题反馈");
+            $("#new-nav").accordion("remove", "系统管理");
+            $("#new-nav").accordion("remove", "通知管理");
+        }
+    });
+
+
+</script>
+
+</html>

@@ -1,0 +1,41 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">配件名称</label>
+            <input name="parkName" required="true" class="easyui-textbox" data-options="validType:'maxLength[100]'" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">材料</label>
+            <input name="materialStandard" required="true" class="easyui-textbox" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">单价</label>
+            <input name="price" class="easyui-numberbox price" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">单位</label>
+            <input name="unit" required="true" class="easyui-textbox" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">通用情况</label>
+            <input name="productDetail" required="true" class="easyui-textbox" type="text"/>
+        </div>
+        <div class="form-line">
+            <label>备注</label>
+            <input  name="remark" class="easyui-textbox" data-options="validType:'maxLength[250]'" type="text"/>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(function(){
+        $('.price').numberbox({
+            required : true,
+            min:0,
+            max:100000000,
+            precision:2,
+            missingMessage:"请输入数字"
+        });
+    });
+
+</script>

@@ -1,0 +1,191 @@
+<style>
+    #allEquipList .tree-file{background:url(../themes/icons/zong.png) no-repeat 0 0}
+</style>
+
+<div class="easyui-layout" style="height: 100%;">
+    <div data-options="region:'west',title:'LEFT',collapsible:false,border:false,noheader:true"
+         style="width:180px;padding:2px">
+        <div class="easyui-panel fl" id="panel-btn-qbzj" title="全部整机" style="width:176px;height:100%;padding:10px;">
+            <ul id="allEquipList"></ul>
+        </div>
+    </div>
+
+    <div data-options="region:'center',title:'RIGHT',collapsible:false,border:false,noheader:true"
+         style="padding:2px;">
+        <div id="tool-overAllList" style="padding:5px;">
+            <div>
+                <a href="javascript:void(0);" class="easyui-linkbutton append" plain="true"
+                   iconCls="icon-myadd">添加设备</a>
+            </div>
+        </div>
+        <table id="overAllList"></table>
+    </div>
+</div>
+
+<!--修改数量等窗口-->
+<div id="win-edit-zj"></div>
+
+<!--添加配件窗口-->
+<div id="win-add-item"></div>
+
+<!--版本号
+<div id="win-add-zjbb"></div>-->
+<script>
+    /*
+     * 修改整机配置信息
+     * @params id:配件ID
+     * @params weight:配件单重
+     * @params number:配件数量
+     * @params remark:配件备注
+     * */
+    function modifyEquipContent(id, weight, number, remark) {
+        $('#win-edit-zj').dialog({closed: false,
+            queryParams: {
+                id: id,
+                weight: weight,
+                number: number,
+                remark: remark}});
+    }
+    /*
+     * 删除配件
+     * @params id:配件ID
+     * */
+    function deleteEquipContent(id) {
+        $.ajax({
+            type: "POST",
+            url:REQUEST_URL+"Import_Delete_Module",
+            data: {
+                id:id
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.code === 0) {
+                    $('#overAllList').datagrid('reload');//刷新数据
+                    $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                }else{
+                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                }
+            }
+        });
+    }
+
+    $(function(){
+
+        function append(){
+            $('#win-add-item').dialog({closed: false});
+/*            $('#win-add-zjbb').dialog({closed: false});*/
+        }
+
+        function remove(){
+            var node = $('#allEquipList').tree('getSelected');
+            if (node){
+                $.post(REQUEST_URL +"Import_Delete_Machine",{
+                    version:node.id
+                },function(data){
+                    if(data.errorDesc=="操作成功"){
+                        $.messager.alert('我的消息', '删除成功！', 'info');
+                        reloadTree($("#allEquipList"));
+                    }
+                });
+            }else{
+                $.messager.alert('我的消息', '请先选择一个整机！', 'error');
+            }
+        }
+
+        $('#panel-btn-qbzj').panel({
+            tools: [{
+                iconCls:'icon-add',
+                handler:function(){
+                    append();
+                }
+            },{
+                iconCls:'icon-remove',
+                handler:function(){
+                    remove();
+                }
+            }]
+        });
+
+        $("#tool-overAllList .append").click(function () {
+            var node = $('#allEquipList').tree('getSelected');
+            if (node){
+                $('#win-add-item').dialog({closed: false,
+                    queryParams: {
+                        id: node.id
+                    }});
+            }else{
+                $.messager.alert('我的消息', '请先选择一个整机！', 'error');
+            }
+        });
+
+        $('#win-edit-zj').dialog({
+            title: '修改',
+            width: 400,
+            height: 280,
+            href:'src/win-edit-zj.html'
+        });
+/*        $('#win-edit-zjbb').dialog({
+            title: '新增整机',
+            width: 400,
+            height: 280,
+            href:'src/win-add-zjbb.html'
+        });*/
+        $('#win-add-item').dialog({
+            title: '新增设备',
+            width: "80%",
+            height: "80%",
+            href:'src/win-add-item.html',
+            maximizable:true,
+            minimizable:true,
+            maximized:true
+        });
+
+
+            $('#allEquipList').tree({
+                url:REQUEST_URL +'GET_All_Over_Version',
+                method:'get',
+                onClick: function (node) {
+                    $("#overAllList").datagrid({
+                        url: REQUEST_URL + "GET_Add_AllEquipment",
+                        queryParams: {
+                            token: TOKEN,
+                            version: node.id
+                        },
+                        method: "get"
+                    });
+                }
+            });
+
+
+
+        $("#overAllList").datagrid({
+            title: "整机配置列表",
+            url:REQUEST_URL + "GET_Add_AllEquipment",
+            queryParams:{
+                token:TOKEN
+            },
+            method:"get",
+            toolbar: "#tool-overAllList",
+            columns: [
+                [
+                    {field: "equipmentId", title: "设备ID", width: 100, align: "center",hidden:true},
+                    {field: "equipmentName", title: "设备名称", width: 100, align: "center"},
+                    {field: "equipmentTypeName", title: "设备型号", width: 100, align: "center"},
+                    {field: "number", title: "数量", width: 100, align: "center"},
+                    {field: "unit", title: "单位", width: 100, align: "center"},
+                    {field: "weight", title: "重量/吨",width: 100, align: "center"},
+                    {field: "totalWeight", title: "总重/吨", width: 100, align: "center"},
+                    {field: "remark", title: "备注", width: 100,editor:'text', align: "center"},
+                    {field: "version", title: "version", width: 100, align: "center",hidden:true},
+                    {field:"_operate",title: "操作",width:100,align:"center",formatter:function(val,row,index){
+                        return '<a href="javascript:void(0);" style="color: #0000ff;font-size: 12px;" onclick="modifyEquipContent('+row.id+','+row.weight+','+row.number+','+'\''+row.remark+'\''+')">编辑</a>' +
+                                '&nbsp;&nbsp;<a href="javascript:void(0);" style="color: #0000ff;font-size: 12px;" onclick="deleteEquipContent('+row.id+')">删除</a>'
+                    }}
+                ]
+            ]
+        });
+
+
+
+    })
+</script>

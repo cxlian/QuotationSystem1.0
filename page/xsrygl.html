@@ -1,0 +1,123 @@
+<div style="padding: 2px;height: 100%;box-sizing: border-box" >
+    <div id="tool-empIdList" style="padding:5px;">
+        <div>
+            <a href="javascript:void(0);" class="easyui-linkbutton edit" plain="true" iconCls="icon-myedit">修改价格权限</a>
+        </div>
+        <div style="padding:5px 0 5px 7px;color:#333;">
+            按姓名查找： <input type="text" class="textbox name" style="width: 150px"/>
+            <a href="javascript:void(0);"  class="easyui-linkbutton btn" iconCls="icon-search">查询</a>
+        </div>
+    </div>
+    <table id="empIdList"></table>
+</div>
+
+<!--修改价格权限窗口-->
+<div id="winEditPricePower" style="display: none">
+    <div class="content">
+        <form action="">
+            <div class="form-line">
+                <label for="id">员工编号</label>
+                <span id="id" class="onlyread"></span>
+            </div>
+
+            <div class="form-line">
+                <label class="required">价格权限</label>
+                <input class="easyui-numberbox salesmanPower" name="salesmanPower" type="text"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    $(function(){
+        //系数验证
+        $('.salesmanPower').numberbox({
+            required : true,
+            min:0,
+            max:1,
+            precision:2,
+            missingMessage: '请输入系数,值的范围[0,1]'
+        });
+
+        function save_price() {
+            $.ajax({
+                type: "POST",
+                url:REQUEST_URL+"Import_Update_Salesman",
+                data: $.param({
+                    'token':TOKEN,'id':$("#id").html()
+                }) + '&' + $('#winEditPricePower form').serialize(),
+                dataType: "json",
+                success: function (data) {
+                    $('#winEditPricePower').dialog({closed: true});//关闭弹窗
+                    $('#empIdList').datagrid('reload');//刷新数据
+                    $.messager.alert('我的消息', '修改权限成功！', 'info');//弹出信息
+                }
+            });
+        }
+
+
+        $('#winEditPricePower').dialog({
+            title: '修改权限',
+            height:240,
+            width:370,
+            buttons: [
+                {
+                    text: '保存',
+                    handler: function () {
+                        save_price();//保存
+                    }
+                },
+                {
+                    text: '关闭',
+                    handler: function () {
+                        $('#winEditPricePower').dialog({closed: true});
+                    }
+                }
+            ],
+            onOpen: function () {//设置初始值
+                var selectMsg = $('#empIdList').datagrid('getSelected');
+                $('#id').html(selectMsg.id);
+                $('.salesmanPower').numberbox('setValue', selectMsg.price);
+            }
+        });
+
+        $("#tool-empIdList .edit").click(function(){
+            var node = $('#empIdList').datagrid('getSelected');//获得选中的行
+            if (node){//已选行
+                $('#winEditPricePower').dialog({closed: false});
+            }else{
+                $.messager.alert('我的消息', '请先选择一条行！', 'error');
+            }
+        });
+
+        $("#tool-empIdList .btn").click(function () {
+            var content = $("#tool-empIdList .name").val();
+            $("#empIdList").datagrid({//搜索
+                url: REQUEST_URL + 'Get_EmpID_List',
+                method: "get",
+                queryParams: {
+                    token: TOKEN,
+                    name: content
+                }
+            });
+        });
+
+        $("#empIdList").datagrid({
+            title: "销售人员列表",
+            url:REQUEST_URL + "Get_EmpID_List",
+            queryParams:{
+                token:TOKEN
+            },
+            method:"get",
+            toolbar: "#tool-empIdList",//工具栏
+            columns: [
+                [
+                    {field: "deptName", title: "部门名称", width: 100, align: "center"},
+                    {field: "price", title: "价格权限", width: 50, align: "center"},
+                    {field: "name", title: "姓名", width: 100, align: "center"},
+                    {field: "id", title: "销售员ID", width: 100, align: "center",hidden:true}
+                ]
+            ]
+        });
+    });
+</script>

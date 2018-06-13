@@ -1,0 +1,50 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label>设备名称</label>
+            <span class="equipmentName onlyread"></span>
+        </div>
+        <div class="form-line">
+            <label>设备型号</label>
+            <span class="equipmentTypeName onlyread"></span>
+        </div>
+        <div class="form-line">
+            <label>单位</label>
+            <span class="unit onlyread"></span>
+        </div>
+        <div class="form-line">
+            <label class="required">材料</label>
+            <input required="true" class="easyui-textbox materialName" name="materialName" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">单重成本/吨</label>
+            <input required="true" class="easyui-numberbox materialCostPrice" name="changeMaterialCostPrice" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">修改价格原因</label>
+            <input required="true" class="easyui-textbox reason" name="reason" type="text"/>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(function(){
+        var selectMsg = $('#priceList').datagrid('getSelected');
+        var node = $('#allEquipType').tree('getSelected');
+     /*   var node1 = $('#allEquipType').tree('getParent',node.target);*/
+        $(".equipmentName").html(selectMsg.equipmentName);
+        $(".equipmentTypeName").html(selectMsg.equipmentTypeName);
+
+        $(".materialName").val(selectMsg.meterialName);
+        $(".unit").html(selectMsg.unit);
+        $(".materialCostPrice").val(selectMsg.materialCostPrice);
+
+        $('.materialCostPrice').numberbox({
+            required : true,
+            min:0,
+            max:100000000,
+            precision:2,
+            missingMessage:"请输入数字"
+        });
+    });
+</script>

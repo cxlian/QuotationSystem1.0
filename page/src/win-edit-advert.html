@@ -1,0 +1,140 @@
+<form>
+    <div class="content">
+        <div class="form-line" style="display: none">
+                <label class="required">项目编号</label>
+                <input required="true" class="easyui-textbox id" name="id" type="text" disabled="disabled" />
+        </div>
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">项目名称</label>
+                <input required="true" class="easyui-textbox companyName" data-options="validType:'maxLength[100]'" name="companyName" type="text"/>
+            </div>
+            <div class="form-column">
+                <label class="required">流数</label>
+                <input required="true" class="easyui-textbox pipelineNumber" data-options="validType:'number'" name="pipelineNumber" type="text"/>
+            </div>
+        </div>
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">弧度</label>
+                <input required="true" class="easyui-textbox radianNumber" name="radianNumber" type="text"/>
+            </div>
+            <div class="form-column">
+                <label class="required">钢种</label>
+                <input required="true" class="easyui-textbox steelGrade" name="steelGrade" type="text"/>
+            </div>
+        </div>
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">断面</label>
+                <input required="true" class="easyui-textbox section" name="section" type="text"/>
+            </div>
+            <div class="form-column">
+                <label class="required">定尺</label>
+                <input required="true" class="easyui-textbox steelSize" name="steelSize" type="text"/>
+            </div>
+        </div>
+        <div class="form-line" style="height: auto;margin-top: 16px;">
+            <label class="required">图片</label>
+
+            <input type="file" title="请选择图片" id="file" multiple
+                   accept="image/png,image/jpg,image/gif,image/JPEG"/>
+            <!--    <a id="btn">上传</a>-->
+            <div id="imgBox3"></div>
+        </div>
+    </div>
+</form>
+
+<div style="width:100%;text-align: center;">
+    <a href="javascript:void (0)" class="easyui-linkbutton" id="btn" style="width: 100px;margin-top: 20px">保存</a>
+</div>
+
+
+<script>
+
+    /*
+    * 删除图片
+    * @param id:图片id
+    * */
+    function removeImageInit($this,id){
+        //本地移除
+        $this.remove();
+        //服务器移除
+        $.ajax({
+            type: "post",
+            url: REQUEST_URL + "import_delete_img",
+            data: {
+                id:id
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 0) {
+/*                    initImgBox="";*/
+                    $.messager.alert('我的消息', '删除成功！', 'error');//弹出信息
+                }else{
+                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                }
+            }
+        });
+    }
+    $(function(){
+
+        imgSrc=[];//清空图片
+        imgFile = [];//清空文件流
+
+
+        function showImages(obj) {
+            var str="";
+            for(var a = 0; a < obj.length; a++) {
+                if(obj[a].path){
+                    str += '<div class="imgContainer"><img  src="'+obj[a].path+'" onclick="imgDisplay(this)"><p onclick="removeImageInit($(this).parent(),'+obj[a].id+')" class="imgDelete">×</p></div>';
+                }
+            }
+            $("#imgBox3").html(str);
+        }
+
+        //初始化数据
+        var selectMsg = $('#advertList').datagrid('getSelected');
+        $(".companyName").val(selectMsg.companyName);
+        $(".pipelineNumber").val(selectMsg.pipelineNumber);
+        $(".radianNumber").val(selectMsg.radianNumber);
+        $(".steelGrade").val(selectMsg.steelGrade);
+        $(".section").val(selectMsg.section);
+        $(".steelSize").val(selectMsg.steelSize);
+        $(".id").val(selectMsg.id);
+
+        //请求图片数据
+        $.ajax({
+            type: "get",
+            url: REQUEST_URL + "get_Advert",
+            data: {
+                id:selectMsg.id
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.code == 0) {
+                    showImages(data.result.imageUrl);//显示图片
+
+                    imgUpload({
+                        inputId: 'file', //input框id
+                        imgBox: 'imgBox3', //图片容器id
+                        buttonId: 'btn', //提交按钮id
+                        upUrl: REQUEST_URL + "import_update_advert",  //提交地址
+                        data: 'fi`le1', //参数名
+                        initImgBox:$("#imgBox3").html(),
+                        table:'advertList',//表格ID
+                        num: "9"//上传个数
+                    });
+                }else{
+                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                }
+            }
+        });
+
+
+        $("#btn").click(function() {
+            var form = $('form');//获取表单
+            setData("form input");
+        });
+    });
+</script>

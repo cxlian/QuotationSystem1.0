@@ -1,0 +1,30 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required" style="width: 130px">最低交易系数</label>
+            <input class="easyui-numberbox minTradeRatio" name="minTradeRatio" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required" style="width: 130px">正常交易系数</label>
+            <input class="easyui-numberbox normalTradeRatio" name="normalTradeRatio" type="text"/>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    $(function(){
+        var selectMsg = $('#priceList').datagrid('getSelected');
+        $(".minTradeRatio").val(selectMsg.minTradeRatio);
+        $(".normalTradeRatio").val(selectMsg.normalTradeRatio);
+
+        //系数验证
+        $('.minTradeRatio,.normalTradeRatio').numberbox({
+            required : true,
+            min:1,
+            max:100,
+            precision:2,
+            missingMessage:"值大于1，格式为X.XX"
+        });
+    });
+</script>

@@ -1,0 +1,55 @@
+
+<div style="padding: 2px;height: 100%;box-sizing: border-box" >
+    <div id="tool-totalAmountList" style="padding:5px;">
+        <div style="padding:5px 0 5px 7px;color:#333;">
+            按姓名查找： <input type="text" class="easyui-textbox name" style="width: 150px"/>
+            <a href="javascript:void(0);"  class="easyui-linkbutton btn" iconCls="icon-search">查询</a>
+        </div>
+    </div>
+    <table id="totalAmountList"></table>
+</div>
+
+
+<script>
+
+    $(function(){
+
+        $("#tool-totalAmountList .btn").click(function () {
+            var content = $("#tool-totalAmountList .name").val();
+            $("#totalAmountList").datagrid({//搜索
+                url: REQUEST_URL + 'Get_Total_Amount_List',
+                method: "get",
+                queryParams: {
+                    token:TOKEN,
+                    name: content
+                }
+            });
+        });
+
+        $("#totalAmountList").datagrid({
+            title: "销售总额列表",
+            url:REQUEST_URL + "Get_Total_Amount_List",
+            method:"get",
+            toolbar: "#tool-totalAmountList",
+            queryParams: {
+                token:TOKEN
+            },
+            nowrap:true,
+            columns: [
+                [
+                    {field: "name", title: "姓名", width:$(this).width() * 0.2, align: "center"},
+                    {field: "totalAmount", title: "业绩总额", width:$(this).width() * 0.2, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "lastAmount", title: "金额", width:$(this).width() * 0.2, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "problemSolved", title: "解决过的问题", width:$(this).width() * 0.2, align: "center", formatter: function (value) {
+                        return "<span title='" + value + "'>" + value + "</span>";
+                    }},
+                    {field: "problemToSolved", title: "提出的问题", width:$(this).width() * 0.2, align: "center", formatter: function (value) {
+                        return "<span title='" + value + "'>" + value + "</span>";
+                    }},
+                    {field: "lastTime", title: "最近一次时间", width:$(this).width() * 0.2, align: "center",
+                        formatter: function(value){return timeStamp2String(value);}}
+                ]
+            ]
+        });
+    });
+</script>

@@ -1,0 +1,179 @@
+<div style="height: 100%;box-sizing: border-box;padding: 10px;">
+    <div style="float: left;height: 100%;width: 45%;">
+        <h3>第一步：请选择设备与型号</h3>
+        <table id="allEquiptment"></table>
+    </div>
+    <div style="float: left;height: 100%;width: 45%;margin-left: 10%;text-align: center">
+        <h3>第二步：确认设备型号，填写整机版本号</h3>
+        <table id="mySelectEquiptment"></table>
+        <form>
+            <div class="content">
+                <div class="form-line">
+                    <label class="required">整机版本号</label>
+                    <input type="text" class="easyui-textbox version" data-options="validType:'isExistRule'"
+                           required="true"/>
+                </div>
+            </div>
+        </form>
+
+        <a href="javascript:void (0)" class="easyui-linkbutton btn" style="width: 100px;margin-top: 20px">保存</a>
+    </div>
+</div>
+
+<script>
+
+    $(function () {
+
+        $.extend($.fn.validatebox.defaults.rules, {
+            isExistRule: {
+                validator: function (value) {
+                    var isExist;
+                    $.ajax({
+                        async: false,
+                        type: "get",
+                        url: REQUEST_URL + "GET_Check_Verison",
+                        data: {
+                            'token': TOKEN,
+                            'version': value
+                        },
+                        success: function (data) {
+                            isExist = data.result;
+                        }
+                    });
+                    return isExist;
+                },
+                message: '版本号已存在!'
+            }
+        });
+
+        $("#allEquiptment").datagrid({
+            url: REQUEST_URL + 'Get_Equipment_List_Machine',//表格数据
+            height: "90%",
+            method: "get",
+            singleSelect: false,
+            title: "设备列表",
+            view: detailview,
+            detailFormatter: function (index, row) {
+                return '<div style="padding:2px"><table class="ddv"></table></div>';
+            },
+            columns: [
+                [
+                    {field: "equipmentName", title: "设备名称", width: 100, align: "center"},
+                    {field: "equipmentType", title: "类型", width: 100, align: "center"},
+                    {field: "lineType", title: "位置", width: 50, align: "center"}
+                ]
+            ],
+            onExpandRow: function (index, row) {
+
+                var ddv = $(this).datagrid('getRowDetail', index).find('table.ddv');
+                ddv.datagrid({
+                    url: REQUEST_URL + 'Get_Continuous_Casting_Equipment_List',//表格数据
+                    method: "get",
+                    height: 'auto',
+                    singleSelect: false,
+                    rownumbers: false,
+                    queryParams: {
+                        equipmentId: row.equipmentId
+                    },
+
+                    pageSize: 5,
+                    pageList: [5, 10, 15, 20, 25],
+                    columns: [
+                        [
+                            /*     {field: "versionId", title: "型号ID", width: 100, align: "center", checkbox: true},*/
+                            {field: "equipmentTypeName", title: "型号", width: 100, align: "center"},
+                            {field: "paramter", title: "工艺参数", width: 100, align: "center"},
+                            {field: "equipmentWeight", title: "重量", width: 50, align: "center"},
+                            {field: "unit", title: "单位", width: 50, align: "center"},
+                            {field: "createTime", title: "添加时间", width: 100, align: "center"}
+                        ]
+                    ],
+                    onClickRow: function (rowIndex, rowData) {
+                        addMyTable(rowData);
+                    },
+                    onResize: function () {
+                        $('#allEquiptment').datagrid('fixDetailRowHeight', index);
+                    },
+                    onLoadSuccess: function () {
+                        setTimeout(function () {
+                            $('#allEquiptment').datagrid('fixDetailRowHeight', index);
+                        }, 0);
+                    }
+                });
+                $('#allEquiptment').datagrid('fixDetailRowHeight', index);
+                $(".datagrid-row-detail .datagrid-pager table td:last-child").hide();
+            }
+        });
+
+        $("#win-add-item .datagrid-pager table td:last-child").hide();
+
+        var initData = {
+            rows: [],
+            total: 0
+        };
+        $("#mySelectEquiptment").datagrid({
+            data: initData,
+            height: "70%",
+            columns: [
+                [
+                    {field: "versionId", title: "型号ID", width: 100, align: "center", hidden: true},
+                    {field: "equipmentTypeName", title: "型号", width: 100, align: "center"},
+                    {field: "paramter", title: "工艺参数", width: 100, align: "center"},
+                    {field: "equipmentWeight", title: "重量", width: 50, align: "center"},
+                    {field: "unit", title: "单位", width: 50, align: "center"},
+                    {field: "createTime", title: "添加时间", width: 100, align: "center"}
+                ]
+            ]
+        });
+        function addMyTable(data) {
+            for (var i = 0; i < initData.rows.length; i++) {
+                if (data.equipmentId === initData.rows[i].equipmentId) {
+                    $.messager.alert('我的消息', '已存在！', 'error');
+                    return;
+                }
+            }
+            initData.rows.push(data);
+            initData.total++;
+            $("#mySelectEquiptment").datagrid({data: initData});
+        }
+
+        $("#win-add-item .btn").click(function () {
+            var form = $('#win-add-item form');//获取表单
+            if (form.form("validate")) {
+                var teamdata = [];
+                for (var i = 0; i < initData.rows.length; i++) {
+                    var teamobj = {
+                        "versionId": initData.rows[i].versionId,
+                        "totalWeight": 1,
+                        "number": 1
+                    };
+                    teamdata.push(teamobj);
+                }
+
+                var json = {
+                    "version": $("#win-add-item .version").val(),
+                    "result": teamdata
+
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: REQUEST_URL + "Import_Add_AllEquipment",
+                    data: {
+                        'unit': JSON.stringify(json)
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code === 0) {
+                            $('#win-add-item').dialog({closed: true});
+                            $("#allEquipList").tree("reload");
+                        } else {
+                            $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                        }
+                    }
+                });
+            }
+        });
+    });
+
+</script>

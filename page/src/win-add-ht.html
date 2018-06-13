@@ -1,0 +1,80 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">合同金额</label>
+            <input required="true" class="easyui-numberbox" name="contractAmount"  missingMessage="请输入数字，格式为X.XX"  data-options="min:0,max:1000000000,precision:2"  type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">客户</label>
+            <input required="true" class="easyui-combobox customerID" name="customerID" type="text" data-options="valueField: 'value',
+            textField: 'label',method:'get',url:REQUEST_URL+'Get_Customer_List?text=',panelHeight:'auto'"/>
+        </div>
+        <div class="form-line">
+            <label class="required">签约时间</label>
+            <input required="true" class="easyui-datebox" name="contractTime" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">下次跟进时间</label>
+            <input required="true" class="easyui-datebox" name="nextTime" type="text"/>
+        </div>
+        <div class="form-line">
+            <label>备注</label>
+            <input class="easyui-textbox" name="remarks" data-options="validType:'maxLength[250]'" type="text"/>
+        </div>
+        <div class="form-line" style="height: auto;margin-top: 16px;">
+            <label>图片</label>
+
+            <input type="file" title="请选择图片" id="file2" multiple
+                   accept="image/png,image/jpg,image/gif,image/JPEG"/>
+            <!--    <a id="btn">上传</a>-->
+            <div id="imgBox2"></div>
+        </div>
+    </div>
+</form>
+
+<div style="width:100%;text-align: center;">
+    <a href="javascript:void (0)" class="easyui-linkbutton" id="btn2" style="width: 100px;margin-top: 20px">保存</a>
+</div>
+<script>
+    $(function(){
+        imgSrc=[];//清空图片
+
+        $("form").form("clear");
+
+        $("#btn2").click(function() {
+            var form = $('form');//获取表单
+            setData("form input");
+        });
+
+        imgUpload({
+            inputId: 'file2', //input框id
+            imgBox: 'imgBox2', //图片容器id
+            buttonId: 'btn2', //提交按钮id
+            upUrl: REQUEST_URL + "Import_Add_Contract",  //提交地址
+            initImgBox:$("#imgBox2").html(),//初始数据
+            table:'tb-htlb',//表格ID
+            data: 'file1', //参数名
+            num: "9"//上传个数
+        });
+
+      /*  imgSrc=[];//清空图片
+
+        $("form").form("clear");
+
+        $("#btn").click(function() {
+            var form = $('form');//获取表单
+            setData("form input");
+        });
+
+        imgUpload({
+            inputId: 'file2', //input框id
+            imgBox: 'imgBox2', //图片容器id
+            buttonId: 'btn2', //提交按钮id
+            upUrl: REQUEST_URL + "Import_Add_Contract",  //提交地址
+            initImgBox:$("#imgBox").html(),//初始数据
+            data: 'file1', //参数名
+            table:'tb-htlb',//表格ID
+            num: "9"//上传个数
+        });*/
+    });
+</script>

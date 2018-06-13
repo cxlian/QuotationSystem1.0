@@ -1,0 +1,167 @@
+<div style="padding: 2px;height: 100%;box-sizing: border-box" >
+    <div id="tool" style="padding:5px;">
+        <div>
+            <a href="javascript:void(0)" class="easyui-linkbutton append" plain="true" iconCls="icon-myadd">添加</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton edit" plain="true" iconCls="icon-myedit">修改</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton remove" plain="true" iconCls="icon-myremove">删除</a>
+        </div>
+
+    </div>
+    <table id="tb"></table>
+</div>
+
+<!--添加部门窗口-->
+<div id="win-add-bm"></div>
+
+<!--修改部门窗口-->
+<div id="win-edit-bm"></div>
+
+<script>
+    $(function() {
+
+        $("#tool .append").click(function(){
+            $('#win-add-bm').dialog({closed: false});
+        });
+
+        $("#tool .edit").click(function(){
+            var selectMsg = $('#tb').datagrid('getSelected');
+            if(!selectMsg){
+                $.messager.alert('我的消息', '请先选择一条记录！', 'error');
+                return;
+            }else {
+                $('#win-edit-bm').dialog({closed: false});
+                $("#mod").val(selectMsg.deptName);
+            }
+        });
+
+        $("#tool .remove").click(function(){
+            var selectMsg = $('#tb').datagrid('getSelected');
+            if (!selectMsg) {
+                $.messager.alert('我的消息', '请先选择一条记录！', 'error');
+            } else {
+                $.messager.confirm('确认对话框', '您确定要删除吗？', function (r) {
+                    if (r) {
+                        $.ajax({
+                            url:REQUEST_URL + "Delete_Department",
+                            data:{
+                                token:TOKEN,
+                                departmentID: $('#tb').datagrid('getSelected').id
+                            },
+                            success:function(data){
+                                if (data.code === 0) {
+                                    $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                                    $('#tb').datagrid('reload');//刷新数据
+                                }else{
+                                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        $("#tb").datagrid({
+            url: REQUEST_URL + 'Get_Department_List',//表格数据
+            method: "get",
+            queryParams: {
+                token:TOKEN
+            },
+            title: "部门列表",//标题
+            toolbar: "#tool",//工具栏
+            columns: [
+                [
+                    {field: "id", title: "ID", width: 100, align: "center",hidden:true},
+                    {field: "deptName", title: "部门名称", width: 200, align: "center"}
+                ]
+            ]
+        });
+
+        function add() {
+            var form = $("#win-add-bm form");//获取表单
+            if (form.form("validate")) {
+                $.ajax({
+                    type: "POST",
+                    url: REQUEST_URL + "Import_Add_Ddepartment",
+                    data: $.param({
+                        'token': TOKEN
+                    }) + '&' + form.serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.errorDesc == "操作成功") {
+                            $('#win-add-bm').dialog({closed: true});//关闭弹窗
+                            $.messager.alert('我的消息', '新增成功！', 'info');//弹出信息
+                            $('#tb').datagrid('reload');//刷新数据
+                        }
+                    }
+                });
+            }
+        }
+
+        $('#win-add-bm').dialog({
+            title: '新增',
+            width:370,
+            heigh:120,
+            href:"src/win-add-bm.html",
+            buttons: [
+                {
+                    text: '保存',
+                    handler: function () {
+                        add();
+                    }
+                },
+                {
+                    text: '关闭',
+                    handler: function () {
+                        $('#win-add-bm').dialog({closed: true});
+                    }
+                }
+            ]
+        });
+
+        function save() {
+            var form = $("#win-edit-bm form");//获取表单
+            if (form.form("validate")) {
+                $.ajax({
+                    type: "POST",
+                    url: REQUEST_URL + "Import_Update_Ddepartment",
+                    data: $.param({
+                        'token': TOKEN,
+                        'departmentID': $('#tb').datagrid('getSelected').id
+                    }) + '&' + form.serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.errorDesc == "操作成功") {
+                            $('#win-edit-bm').dialog({closed: true});//关闭弹窗
+                            $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                            $('#tb').datagrid('reload');//刷新数据
+                        }
+                    }
+                });
+            }
+        }
+
+        $('#win-edit-bm').dialog({//设置修改窗口
+            title: '修改',
+            width:370,
+            heigh:120,
+            href:"src/win-edit-bm.html",
+            buttons: [
+                {
+                    text: '保存',
+                    handler: function () {
+                        console.log("点击保存");
+                        save();
+                    }
+                },
+                {
+                    text: '关闭',
+                    handler: function () {
+                        $('#win-edit-bm').dialog({closed: true});
+                    }
+                }
+            ]
+        });
+
+    });
+</script>

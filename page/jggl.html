@@ -1,0 +1,322 @@
+<div class="easyui-layout myLayout" style="height: 100%;">
+<!--    <div data-options="region:'west',title:'LEFT',border:false,noheader:true"
+         style="width:210px;padding:2px">
+        <div class="easyui-panel fl" title="连铸设备" style="width:100%;height:100%;padding:10px;">
+            <ul id="allEquipType"></ul>
+        </div>
+    </div>-->
+
+    <div class="myWest" data-options="region:'west',title:'LEFT',border:false,noheader:true"
+         style="width:210px;padding:2px">
+        <div class="easyui-panel fl" title="连铸设备" style="width:100%;height:100%;padding:10px;">
+            <ul id="allEquipType"></ul>
+        </div>
+    </div>
+
+    <div data-options="region:'center',title:'RIGHT',collapsible:false,border:false,noheader:true"
+         style="padding:2px;">
+        <div id="tool-price" style="padding:5px;">
+            <div>
+                <a href="javascript:void(0);" class="easyui-linkbutton append" plain="true" iconCls="icon-myadd">添加</a>
+                <a href="javascript:void(0);" class="easyui-linkbutton edit" plain="true" style="display: none" iconCls="icon-myedit">修改价格</a>
+                <a href="javascript:void(0);" class="easyui-linkbutton admin-edit" style="display: none" plain="true" iconCls="icon-myedit">修改系数</a>
+                <a href="javascript:void(0);" class="easyui-linkbutton remove" plain="true" iconCls="icon-myremove">删除</a>
+            </div>
+        </div>
+        <table id="priceList"></table>
+    </div>
+</div>
+
+<!--新增窗口-->
+<div id="win-add-price"></div>
+
+<!--修改窗口-->
+<div id="win-edit-price"></div>
+
+<!--管理员修改窗口-->
+<div id="win-edit-ratio2"></div>
+
+<script>
+    $(function(){
+
+        $(".myWest").css("width",$(".tree-node").width()+36);
+
+        var clickNode;//是否点击了子节点 1 ture,0 false
+
+        function add_price() {//增加请求
+            var form = $('#win-add-price form');//获取表单
+            var node = $('#allEquipType').tree('getSelected');
+            if (form.form("validate")) {
+                $.ajax({
+                    type: "POST",
+                    url: REQUEST_URL + "Import_Add_Price",
+                    data: $.param({
+                        'equipmentId': node.typeId,
+                        'token': TOKEN
+                    }) + '&' + form.serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code === 0) {
+                            $('#win-add-price').dialog({closed: true});//关闭弹窗
+                            $('#priceList').datagrid('reload');//刷新数据
+                            $.messager.alert('我的消息', '新增成功！', 'info');//弹出信息
+                        } else {
+                            $.messager.alert('我的消息', '操作失败,请联系管理员！', 'error');//弹出信息
+                        }
+                    }
+                });
+            }
+        }
+
+        //修改价格
+        function edit_price(){
+            var form = $('#win-edit-price form');//获取表单
+            var selectMsg = $('#priceList').datagrid('getSelected');
+            if (form.form("validate")) {
+                $.ajax({
+                    type: "POST",
+                    url: REQUEST_URL + "Import_Change_Price",
+                    data: $.param({
+                        'equipmentId': selectMsg.equipmentId,
+                        'priceId': selectMsg.priceId,
+                        'materialCostPrice': selectMsg.materialCostPrice
+                    }) + '&' + form.serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.errorDesc == "操作成功") {
+                            $('#win-edit-price').dialog({closed: true});//关闭弹窗
+                            $('#priceList').datagrid('reload');//刷新数据
+                            $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                        }
+                    }
+                });
+            }
+        }
+
+        //修改系数
+        function edit_ratio(){
+            var form = $('#win-edit-ratio2 form');//获取表单
+            var selectMsg = $('#priceList').datagrid('getSelected');
+            var minTradePrice=$('#win-edit-ratio2 form .minTradeRatio').val()*selectMsg.materialCostPrice;
+            var normalTradePrice=$('#win-edit-ratio2 form .minTradeRatio').val()*selectMsg.materialCostPrice;
+            $.ajax({
+                type: "POST",
+                url:REQUEST_URL+"Import_Adjust_Price",
+                data: $.param({
+                    'token':TOKEN,
+                    'priceId': selectMsg.priceId,
+                    'minTradePrice':minTradePrice,
+                    'normalTradePrice':normalTradePrice
+                }) + '&' + form.serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.errorDesc == "操作成功") {
+                        $('#win-edit-ratio2').dialog({closed: true});//关闭弹窗
+                        $('#priceList').datagrid('reload');//刷新数据
+                        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                    }
+                }
+            });
+        }
+
+        $("#tool-price .append").click(function () {
+       /*     console.log("点击了添加按钮："+clickNode);*/
+            if (clickNode){
+                $('#win-add-price').dialog({closed: false});
+                clickNode=!clickNode;
+            }else{
+                $.messager.alert('我的消息', '请先选择一个型号！', 'error');
+            }
+        });
+
+        $("#tool-price .edit").click(function () {
+            var node = $('#priceList').datagrid('getSelected');//获得选中的行
+            if (node){
+                $('#win-edit-price').dialog({closed: false});
+            }else{
+                $.messager.alert('我的消息', '请先选择一个价格！', 'error');
+            }
+        });
+
+        $("#tool-price .admin-edit").click(function () {
+            var node = $('#priceList').datagrid('getSelected');//获得选中的行
+            if (node){
+                $('#win-edit-ratio2').dialog({closed: false});
+            }else{
+                $.messager.alert('我的消息', '请先选择一个价格！', 'error');
+            }
+        });
+
+        $("#tool-price .remove").click(function () {
+            var node = $('#priceList').datagrid('getSelected');//获得选中的行
+            if (node){//已选行
+                $.post(REQUEST_URL +"Import_Delete_Price",{
+                    priceId:node.priceId
+                },function(data){
+                    if(data.errorDesc=="操作成功"){
+                        $.messager.alert('我的消息', '删除成功！', 'info');
+                        $('#priceList').datagrid('reload');
+                    }
+                });
+            }else{
+                $.messager.alert('我的消息', '请先选择一个价格！', 'error');
+            }
+        });
+
+        $('#win-add-price').dialog({
+            title: '新增价格',
+            href:'src/win-add-price.html',
+            width: 370,
+            height: 360,
+            buttons: [
+                {
+                    text: '保存',
+                    handler: function () {
+                        add_price();//增加
+                    }
+                },
+                {
+                    text: '关闭',
+                    handler: function () {
+                        $('#win-add-price').dialog({closed: true});
+                    }
+                }
+            ]
+        });
+
+        $('#win-edit-price').dialog({
+            title: '修改价格',
+            href:'src/win-edit-price.html',
+            width: 370,
+            height: 400,
+            buttons: [
+                {
+                    text: '保存',
+                    handler: function () {
+                        edit_price();//增加
+                    }
+                },
+                {
+                    text: '关闭',
+                    handler: function () {
+                        $('#win-edit-price').dialog({closed: true});
+                    }
+                }
+            ]
+        });
+
+        $('#win-edit-ratio2').dialog({
+            title: '修改系数',
+            href:'src/win-edit-ratio2.html',
+            width: 390,
+            height: 240,
+            buttons: [
+                {
+                    text: '保存',
+                    handler: function () {
+                        edit_ratio();//增加
+                    }
+                },
+                {
+                    text: '关闭',
+                    handler: function () {
+                        $('#win-edit-ratio2').dialog({closed: true});
+                    }
+                }
+            ]
+        });
+
+        function search_xh(content) {
+            $("#priceList").datagrid({//搜索请求
+                url: REQUEST_URL + 'Get_Price_List',
+                method: "get",
+                queryParams: {
+                    token: TOKEN,
+                    versionId: content
+                }
+            });
+        }
+
+        $.get(REQUEST_URL + 'Get_Equipment_List', {
+            token: TOKEN,
+            children:1
+        }, function (data) {
+            $('#allEquipType').tree({
+                data: data,
+                onClick: function (node) {
+                   if (!node.children){
+                        search_xh(node.typeId);
+                        clickNode= true;
+                       console.log("clickNode"+clickNode);
+                    }
+                }
+            });
+
+            var mydata=data;
+            for(var i=0;i<mydata.length;i++){
+                mydata[i].iconCls='icon-zong';
+                for(var j=0;j<mydata[i].children.length;j++){
+                    mydata[i].children[j].iconCls='icon-zi';
+                }
+            }
+            $('#allEquipType').tree({
+                data: mydata
+            });
+        });
+
+
+        /*
+        * 价格表格字段控制
+        * */
+
+        $("#priceList").datagrid({
+            title: "价格列表",
+            url: REQUEST_URL + "Get_Price_List",
+            queryParams: {
+                token: TOKEN
+            },
+            method: "get",
+            toolbar: "#tool-price"
+        });
+
+        if($.cookie('role')==0){//如果是管理员
+            $("#priceList").datagrid({
+                columns: [
+                    [
+                        {field: "equipmentTypeName", title: "设备型号", width: 100, align: "center"},
+                        {field: "meterialName", title: "材料", width: 100, align: "center"},
+                        {field: "unit", title: "单位", width: 100, align: "center"},
+                        {field: "materialCostPrice", title: "单重吨成本/元", width: 100, align: "center", formatter: function(value, row){return formatterMoney(value, row);} },
+                        {field: "minTradeRatio", title: "最低系数", width: 100, align: "center"},
+                        {field: "normalTradeRatio", title: "正常系数", width: 100, align: "center"},
+                        {field: "minTradePrice", title: "最低价格", width: 100, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                        {field: "normalTradePrice", title: "正常价格", width: 100, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                        {field: "reason", title: "修改价格原因", width: 100, align: "center"},
+                        {field: "createTime", title: "修改价格时间", width: 100, align: "center"}
+                    ]
+                ]
+            });
+        }else{//如果是销售员
+            $("#priceList").datagrid({
+                columns: [
+                    [
+                        {field: "equipmentTypeName", title: "设备型号", width: 100, align: "center"},
+                        {field: "meterialName", title: "材料", width: 100, align: "center"},
+                        {field: "unit", title: "单位", width: 100, align: "center"},
+                        {field: "materialCostPrice", title: "单重吨成本/元", width: 100, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                        {field: "reason", title: "修改价格原因", width: 100, align: "center"},
+                        {field: "createTime", title: "修改价格时间", width: 100, align: "center"}
+                    ]
+                ]
+            });
+        }
+
+        if($.cookie('role')==0){//如果是管理员
+            $("#tool-price .admin-edit").show();
+            $("#tool-price .edit").show();
+        }else{
+            $("#tool-price .edit").show();
+          /*  $("#tool-price .admin-edit").hidden();*/
+        }
+    })
+</script>

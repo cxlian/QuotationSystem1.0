@@ -1,0 +1,90 @@
+<div style="padding: 2px;height: 100%;box-sizing: border-box">
+    <div id="tool-xmlb" style="padding:5px;">
+        <div>
+            <a href="javascript:void(0);" class="easyui-linkbutton append" plain="true" iconCls="icon-myadd">添加</a>
+            <a href="javascript:void(0);" class="easyui-linkbutton remove" plain="true" iconCls="icon-myremove">删除</a>
+            <!-- <a href="javascript:void(0);" class="easyui-linkbutton edit" plain="true" iconCls="icon-edit">修改</a>-->
+        </div>
+
+    </div>
+    <table id="advertList"></table>
+</div>
+
+<!--新增项目窗口-->
+<div id="win-add-advert"></div>
+
+<script>
+    var dialog;//全局变量：窗口
+
+    function seeAdvert() {
+        dialog = $("<div/>").dialog({
+            title: '修改项目',
+            width: 700,
+            height: 470,
+            closed: false,
+            href: 'src/win-edit-advert.html',
+            onClose: function () {
+                $(this).dialog("destroy");
+            }
+        });
+    }
+
+    $(function () {
+        $("#tool-xmlb .remove").click(function () {
+            var node = $('#advertList').datagrid('getSelected');
+            if (node) {
+                $.post(REQUEST_URL + "import_delete", {
+                    token: TOKEN,
+                    id: node.id
+                }, function (data) {
+                    $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                    $('#advertList').datagrid('reload');//刷新表格
+                });
+            } else {
+                $.messager.alert('我的消息', '请先选择一个项目！', 'error');
+            }
+        });
+
+        $("#tool-xmlb .append").click(function () {
+            dialog = $("<div/>").dialog({
+                title: '新增项目',
+                width: 700,
+                height: 470,
+                closed: false,
+                href: 'src/win-add-advert.html',
+                onClose: function () {
+                    $(this).dialog("destroy");
+                    imgFile=[];//图片清空
+                }
+            });
+        });
+
+        $("#advertList").datagrid({
+            title: "项目列表",
+            url: REQUEST_URL + "get_AdvertList",
+            queryParams: {
+                token: TOKEN
+            },
+            method: "get",
+            columns: [
+                [
+                    {field: "id", title: "项目ID", width:$(this).width() * 0.2, align: "center", hidden: true},
+                    {field: "companyName", title: "项目名称", width:$(this).width() * 0.2, align: "center"},
+                    {field: "customerId", title: "客户ID", width:$(this).width() * 0.2, align: "center", hidden: true},
+                    {field: "imgUrl", title: "图片路径", width:$(this).width() * 0.2, align: "center", hidden: true},
+                    {field: "pipelineNumber", title: "流数", width:$(this).width() * 0.2, align: "center"},
+                    {field: "radianNumber", title: "弧度", width:$(this).width() * 0.2, align: "center"},
+                    {field: "section", title: "断面", width:$(this).width() * 0.2, align: "center"},
+                    {field: "steelGrade", title: "钢种", width:$(this).width() * 0.2, align: "center"},
+                    {field: "steelSize", title: "定尺", width:$(this).width() * 0.2, align: "center"},
+                    {field: "time", title: "创建时间", width:$(this).width() * 0.2, align: "center",formatter: function (value) {return timeStamp2String(value);}},
+                    {field: "_operate", title: "操作", width:$(this).width() * 0.2, align: "center", formatter: function (val, row, index) {
+                        return '<a href="javascript:;" style="color: #0000ff;font-size: 12px;" onclick="seeAdvert(' + index + ')">查看</a>'
+                    }}
+                ]
+            ],
+            toolbar: "#tool-xmlb"
+        });
+
+    });
+</script>

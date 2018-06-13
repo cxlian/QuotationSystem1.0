@@ -1,0 +1,73 @@
+<div class="content win-add-zh">
+    <form>
+        <div class="form-line">
+            <label class="required">部门</label>
+            <input required="true" class="dept" name="departmentID" type="text" />
+        </div>
+
+        <div class="form-line hidebox">
+            <label class="required">职位</label>
+            <input required="true" class="pos" name="positionID" type="text" />
+        </div>
+
+        <div class="form-line">
+            <label class="required">手机号</label>
+            <input required="true" class="easyui-textbox phone" data-options="validType:'mobile'" name="phone" type="text"/>
+        </div>
+
+        <div class="form-line">
+            <label class="required">员工名字</label>
+            <input required="true" class="easyui-textbox name" name="name" type="text" value=""/>
+        </div>
+
+        <div class="form-line">
+            <label class="required">性别</label>
+            <select name="gender" class="textbox gender">
+                <option value="1" selected = "selected">男</option>
+                <option value="0">女</option>
+            </select>
+        </div>
+
+        <div class="form-line">
+            <label class="required">密码</label>
+            <input required="true" class="easyui-textbox password" name="password" type="text" value=""/>
+        </div>
+        <div class="form-line">
+            <label class="required">角色</label>
+            <select name="role" class="textbox role">
+                <option value="0" selected = "selected">管理员</option>
+                <option value="1">销售员</option>
+                <option value="2">生产员</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    $(function(){
+        $(".dept").combobox({
+            valueField: 'id',
+            textField: 'text',
+            data:dataApartment,
+            panelHeight:'auto',
+            onSelect : function(data){
+                $('.hidebox').show();
+                $(".pos").combobox({
+                    data:data.list
+                });
+            },
+            onUnselect:function(){
+                $('.hidebox').hide();
+            }
+        });
+
+        $(".pos").combobox({
+            valueField: 'id',
+            textField: 'position',
+            panelHeight:'auto'
+        });
+
+        $('.hidebox').hide();
+     });
+</script>

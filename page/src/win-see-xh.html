@@ -1,0 +1,95 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">型号名称</label>
+            <input required="true" class="easyui-textbox" data-options="validType:'maxLength[100]'" name="equipmentTypeName" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">单位</label>
+            <input required="true" class="easyui-textbox" name="unit" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">技术特点</label>
+            <input required="true" class="easyui-textbox" name="technology" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">工艺参数</label>
+            <input required="true" class="easyui-textbox" name="parameter" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">设备重量</label>
+            <input required="true" class="easyui-numberbox" missingMessage="请输入数字，格式为X.XX"  data-options="min:0,max:100000000,precision:2"  name="equipmentWeight" type="text"/>
+        </div>
+        <div class="form-line">
+            <label>备注</label>
+            <input class="easyui-textbox" name="remark"  type="text" readonly/>
+        </div>
+        <div class="form-line">
+            <label>创建时间</label>
+            <input class="easyui-textbox createTime" name="createTime" type="text" readonly/>
+        </div>
+        <div class="form-line">
+            <label>设备</label>
+            <input class="easyui-textbox" name="equipmentName"  type="text" readonly/>
+        </div>
+    </div>
+</form>
+
+<div style="width:100%;text-align: center;">
+    <a href="javascript:void (0)" class="easyui-linkbutton btn" style="width: 100px;margin-top: 20px">保存</a>
+</div>
+
+<style>
+    .textbox-readonly {
+        border: none;
+    }
+</style>
+<script>
+    $(function(){
+        var obj = $('#win-see-xh').dialog('options');//获得窗口对象
+        var queryParams = obj["queryParams"];//获得窗口额外参数 queryParams.account_id 用户名ID
+
+        $("#win-see-xh .btn").click(function () {
+            var form = $('form');//获取表单
+            if (form.form("validate")) {
+                $.ajax({
+                    type: "POST",
+                    url: REQUEST_URL + "Import_Update_Continuous_Casting_Equipment",
+                    data: $.param({
+                        'token': TOKEN,
+                        'versionId': queryParams.versionId
+                    }) + '&' + $('#win-see-xh form').serialize(),
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.code === 0) {
+                            $('#win-see-xh').dialog({closed: true});//关闭弹窗
+                            $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                            $('#tb-lzsb').datagrid('reload');//刷新数据
+                        }else{
+                            $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                        }
+                    }
+                });
+            }
+        });
+
+        $.ajax({
+            type: "get",
+            url:REQUEST_URL+"Get_Equipment_Detail",
+            data: {
+                'versionId':queryParams.versionId
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.code === 0) {
+                    var mydata=data.result;
+                    mydata.createTime=timeStamp2String(data.result.createTime);
+                    $('#win-see-xh').form('load',mydata);
+                }else{
+                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                }
+            }
+        });
+
+    });
+</script>

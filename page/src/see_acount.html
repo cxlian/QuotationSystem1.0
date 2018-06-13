@@ -1,0 +1,186 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <div class="form-column">
+                <label for="id">员工编号</label>
+                <span id="id" class="onlyread"></span>
+            </div>
+            <div class="form-column">
+                <label for="gender" class="required">性别</label>
+                <select name="" id="gender" class="textbox">
+                    <option value="1">男</option>
+                    <option value="0">女</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-line">
+            <div class="form-column">
+                <label for="username">账号</label>
+                <span id="username" class="onlyread"></span>
+            </div>
+            <div class="form-column">
+                <label for="roleId" class="required">角色</label>
+                <select name="" id="roleId" class="textbox">
+                    <option value="0">管理员</option>
+                    <option value="1">销售员</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">姓名</label>
+                <input required="true" class="easyui-textbox name"  name="name" type="text"/>
+            </div>
+            <div class="form-column">
+                <label>密码</label>
+                <input id="pdassword" class="textbox" type="text" placeholder="留空则不修改"/>
+            </div>
+        </div>
+
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">部门名称</label>
+                <input required="true" class="deptId" type="text" />
+     <!--           <select name="" id="deptId" class="textbox">
+                    <option value="9999">-请选择-</option>
+                </select>-->
+            </div>
+            <div class="form-column">
+                <label for="status" class="required">状态</label>
+                <select name="" id="status" class="textbox">
+                    <option value="1">可用</option>
+                    <option value="0">不可用</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-line">
+            <div class="form-column">
+                <label class="required">职位名称</label>
+                <input required="true" class="positionId" type="text" />
+ <!--               <select name="" id="positionId" class="textbox">
+                    <option value="9999" selected>-请选择-</option>
+                </select>-->
+            </div>
+            <div class="form-column">
+
+            </div>
+        </div>
+        <div class="tip">
+            <div class="form-line">
+                <div class="form-column">
+                    <label>最近修改时间</label>
+                    <span id="lastModifiedTime" class="onlyread"></span>
+                </div>
+                <div class="form-column">
+                    <label>创建时间</label>
+                    <span id="createTime" class="onlyread"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div style="width:100%;text-align: center;">
+    <a href="javascript:void (0)" class="easyui-linkbutton btn-edit" style="width: 100px;margin-top: 20px">保存</a>
+</div>
+<script>
+
+    $(function () {
+        console.log(dataApartment);
+        $(".deptId").combobox({
+            valueField: 'id',
+            textField: 'text',
+            data:dataApartment,
+            panelHeight:'auto',
+            onSelect : function(data){
+                $(".positionId").combobox({
+                    data:data.list
+                });
+            }
+        });
+        $(".positionId").combobox({
+            valueField: 'id',
+            textField: 'position',
+            panelHeight:'auto'
+        });
+        $(".btn-edit").click(function () {
+            var form = $('#win-see-zh form');//获取表单
+            if (form.form("validate")) {
+                $.post(REQUEST_URL + "Import_Update_Account", {
+                    token: TOKEN,
+                    password: $(".content #password").val(),
+                    role: $(".content #roleId").val(),
+                    phone: $(".content #username").html(),
+                    gender: $(".content #gender").val(),
+                    name: $(".content .name").val(),
+                    positionID: $(".content .positionId").val(),
+                    departmentID: $(".content .deptId").val(),
+                    id: $(".content #id").html(),
+                    status: $(".content #status").val(),
+                    power: JSON.stringify([
+                        {moduleId: 1, see: 0, add: 0, update: 0, delete: 0},
+                        {moduleId: 1, see: 0, add: 0, update: 0, delete: 0}
+                    ])
+                }, function (data) {
+                    if (data.code === 0) {
+                        $('#win-see-zh').dialog({closed: true});
+                        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                        $('#tb-zhlb').datagrid('reload');//刷新表格
+                    } else {
+                        $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                    }
+                });
+            }
+        });
+
+        var obj = $('#win-see-zh').dialog('options');//获得窗口对象
+        var queryParams = obj["queryParams"];//获得窗口额外参数 queryParams.account_id 用户名ID
+
+        //部门与职位二级联动
+   /*     setApartmentPosition(dataApartment,$("#deptId"),$("#positionId"));*/
+
+
+   /*     function setPosition(deptId){
+            $("#positionId")
+        }*/
+
+        //获取账号信息
+        $.ajax({
+            type: "get",
+            url: REQUEST_URL + "get_Detail_Account",
+            data: {
+                token: TOKEN,
+                id: queryParams.account_id
+            },
+            dataType: "json",
+            success: function (data) {
+                if (data.code === 0) {
+                    $('#win-see-zh #createTime').html(timeStamp2String(data.result.createTime));
+                    $('#win-see-zh #createUser').html(data.result.createUser);
+                 /*   $('#win-see-zh #deptId').val(data.result.deptId);*/
+                    $("#win-see-zh .deptId").combobox('setValue',data.result.deptId);
+                    $('#win-see-zh #empNo').val(data.result.empNo);
+                    $('#win-see-zh #gender').val(data.result.gender);
+                    $('#win-see-zh #id').html(data.result.id);
+                    $('#win-see-zh #lastModifiedTime').html(timeStamp2String(data.result.lastModifiedTime));
+                    $('#win-see-zh #lastModifiedUser').html(data.result.lastModifiedUser);
+                    $("#win-see-zh .name").textbox('setValue',data.result.name);
+                    $('#win-see-zh #phone').val(data.result.phone);
+                    $('#win-see-zh #price').val(data.result.price);
+                    $('#win-see-zh #roleId').val(data.result.roleId);
+                    $('#win-see-zh #status').val(data.result.status);
+                    $('#win-see-zh #username').html(data.result.username);
+                    /*        setPosition(data.result.deptId);*/
+         /*           setApartmentPosition(dataApartment,$("#deptId"),$("#positionId"));
+                    $('#win-see-zh #positionId').val(data.result.positionId);*/
+                     $("#win-see-zh .positionId").combobox('setValue',data.result.positionId);
+                }else{
+                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                }
+
+            }
+        });
+    });
+</script>

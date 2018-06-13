@@ -1,0 +1,29 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required" style="width: 130px">最低交易系数</label>
+            <input required="true" class="easyui-numberbox minTradeRatio" name="minTradeRatio" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required" style="width: 130px">正常交易系数</label>
+            <input required="true" class="easyui-numberbox normalTradeRatio" name="normalTradeRatio" type="text"/>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(function(){
+        /*初始化表格*/
+        var selectMsg = $('#tb-pjlb').datagrid('getSelected');
+        $("#win-edit-xs .minTradeRatio").val(selectMsg.minTradeRatio);
+        $("#win-edit-xs .normalTradeRatio").val(selectMsg.normalTradeRatio);
+
+        $('.minTradeRatio,.normalTradeRatio').numberbox({
+            required : true,
+            min:1,
+            max:100,
+            precision:2,
+            missingMessage:"值大于1，格式为X.XX"
+        });
+    });
+</script>

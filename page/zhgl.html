@@ -1,0 +1,279 @@
+<style>
+    #tt-bmlb .tree-file{background:url(../themes/icons/zong.png) no-repeat 0 0}
+</style>
+
+<div class="easyui-layout" style="height: 100%;">
+    <div data-options="region:'west',title:'LEFT',collapsible:false,border:false,noheader:true"
+         style="width:180px;padding:2px">
+        <div class="easyui-panel fl" title="全部部门" style="width:176px;height:100%;padding:10px;">
+            <ul id="tt-bmlb"></ul>
+        </div>
+    </div>
+
+    <div data-options="region:'center',title:'RIGHT',collapsible:false,border:false,noheader:true"
+         style="padding:2px;">
+        <div id="tool-zhlb" style="padding:5px;">
+            <div>
+                <a href="javascript:void(0);" class="easyui-linkbutton append" plain="true"
+                   iconCls="icon-myadd">添加</a>
+                <a href="javascript:void(0);" class="easyui-linkbutton edit" plain="true" iconCls="icon-myedit">修改</a>
+                <a href="javascript:void(0);" class="easyui-linkbutton remove" plain="true" iconCls="icon-myremove">删除</a>
+            </div>
+            <div style="padding:5px 0 5px 7px;color:#333;">
+                按部门查找： <select name="" id="key-bm" class="textbox" style="width: 110px">
+                <option value="9999">全部</option>
+            </select>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                按姓名查找： <input type="text" class="textbox name" style="width: 150px"/>
+                <a href="javascript:void(0);"  class="easyui-linkbutton btn" iconCls="icon-search">查询</a>
+            </div>
+        </div>
+        <table id="tb-zhlb" style="width: 100%;box-sizing: border-box"></table>
+    </div>
+</div>
+
+
+<!--新增窗口-->
+<div id="win-add-zh"></div>
+
+<!--查看个人资料窗口-->
+<div id="win-see-zh"></div>
+
+<script>
+var editIndex = undefined;
+
+function nowRow(index) {
+    if (editIndex != index) {
+        $('#zw').datagrid('selectRow', index);
+        editIndex = index;
+    }
+}
+function add_zh() {//增加请求
+    var form = $('#win-add-zh form');//获取表单
+    if (form.form("validate")) {
+        $.ajax({
+            type: "POST",
+            url: REQUEST_URL + "Import_Add_Account",
+            data: $.param({
+                'token': TOKEN, 'power': JSON.stringify([
+                    {moduleId: 1, see: 0, add: 0, update: 0, delete: 0},
+                    {moduleId: 1, see: 0, add: 0, update: 0, delete: 0}
+                ])
+            }) + '&' + $('.win-add-zh form').serialize(),
+            dataType: "json",
+            success: function (data) {
+                $('#win-add-zh').dialog({closed: true});//关闭弹窗
+                $.messager.alert('我的消息', '新增成功！', 'info');//弹出信息
+                $('#tb-zhlb').datagrid('reload');//刷新数据
+            }
+        });
+    }
+}
+
+/*
+* 打开对话框并传递用户名ID
+* */
+function deliver(id){
+    $('#win-see-zh').dialog({
+        closed: false,
+        queryParams: { account_id: id }
+    });
+
+}
+var dataApartment;
+
+$(function () {
+    /*
+    * 获取账号表格
+    * */
+    $("#tb-zhlb").datagrid({
+        title: "账号列表",
+        url: REQUEST_URL + "get_List_Account",
+        queryParams: {
+            token: TOKEN
+        },
+        method: "get",
+        toolbar: "#tool-zhlb",//工具栏
+        columns: [
+            [
+                {field: "name", title: "姓名", width:$(this).width() * 0.2, align: "center"},
+                {field: "gender", title: "性别", width:$(this).width() * 0.2, align: "center",
+                    formatter: function (value) {
+                        if (value == 0) return "女";
+                        if (value == 1) return "男";
+                    }},
+                {field: "position", title: "职位", width:$(this).width() * 0.2, align: "center"},
+                {field: "deptName", title: "部门名称", width:$(this).width() * 0.2, align: "center"},
+                {field: "phone", title: "手机号", width:$(this).width() * 0.2, align: "center"},
+                {field: "status", title: "是否启用", width:$(this).width() * 0.2, align: "center",
+                    formatter: function (value) {
+                        if (value == "可用") return "启用";
+                        if (value == "不可用") return "关闭";
+                    }},
+                {field: "createTime", title: "创建时间", width:$(this).width() * 0.2, align: "center",
+                    formatter: function (value) {
+                        return timeStamp2String(value);
+                    }},
+                {field: "modifiedTime", title: "修改时间", width:$(this).width() * 0.2, align: "center",
+                    formatter: function (value) {
+                        return timeStamp2String(value);
+                    }},
+                {field:"_operate",title: "操作",width:$(this).width() * 0.2,align:"center",formatter:function(val,row,index){
+                    return '<a href="javascript:;" style="color: #0000ff;font-size: 12px;" onclick="deliver('+row.id+')">查看</a>'
+                }}
+            ]
+        ]
+    });
+
+    /*
+     * 获取部门树、按部门查找职位
+     * */
+    function search_zh(){
+        var content;
+             if($('#key-bm:eq(0)').val()<6666){
+            content=$('#key-bm').find("option:selected").html();
+        }else{
+            content=undefined;
+        }
+        $("#tb-zhlb").datagrid({
+            url: REQUEST_URL + 'get_List_Account',
+            method: "get",
+            queryParams:{
+                token: TOKEN,
+                deptName:content
+            }
+        });
+    }
+
+    $('#key-bm').change(function () {//下拉框变化时
+        if ($(this).val() < 6666) {
+            var select_node = $('#tt-bmlb').tree('find', $(this).val());
+            $('#tt-bmlb').tree('select', select_node.target);
+        }
+        search_zh();
+    });
+
+    $.get(REQUEST_URL + 'Get_Department_List', {
+        token: TOKEN
+    }, function (data) {
+        $('#tt-bmlb').tree({//设置部门树
+            data: data.rows,//数据
+            onClick: function (node) {
+                $("#key-bm").val(node.id);
+                search_zh();
+            },
+            onLoadSuccess:function(node,data){
+                dataApartment=data;
+              //  console.log(dataApartment)
+            }
+        });
+        for (var i = 0; i < data.rows.length; i++) {//设置下拉框
+            $("#key-bm").append("<option value='" + data.rows[i].id + "'>" + data.rows[i].deptName + "</option>");
+        }
+    });
+
+    /*
+    * 按名字查找账号
+    * */
+    $("#tool-zhlb .btn").click(function () {
+        var content = $("#tool-zhlb .name").val();
+        $("#tb-zhlb").datagrid({//搜索
+            url: REQUEST_URL + 'get_List_Account',
+            method: "get",
+            queryParams: {
+                token: TOKEN,
+                name: content
+            }
+        });
+    });
+
+    /*
+    * 点击添加按钮
+    * */
+
+    $('#win-add-zh').dialog({//设置新增窗口
+        title: '新增账号',
+        href:'src/add_acount1.html',
+        width: 410,
+        height:440,
+        closed: true,
+        modal: true,
+        buttons: [
+            {
+                text: '保存',
+                handler: function () {
+                    add_zh();//增加
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-add-zh').dialog({closed: true});
+                }
+            }
+        ],
+        onOpen: function () {
+            $("#win-add-zh .departmentID").html($("#key-bm option:selected").val());
+
+            //找出部门ID对应的职位
+            var bm_id = $("#key-bm option:selected").val();//部门ID
+            var bm_length = dataApartment.length;//部门长度
+            var zw_length;//职位长度
+            for (var i = 0; i < bm_length; i++) {
+                if (dataApartment[i].id == bm_id) {//找到部门
+                    $("#win-add-zh .positionID").children("option").not(":eq(0)").remove();
+                    zw_length = dataApartment[i].list.length;
+                    if (zw_length == 0)  return;
+                    for (var j = 0; j < zw_length; j++) {//打印职位
+                        $("#win-add-zh .positionID").append("<option value='" + dataApartment[i].list[j].id + "'>" + dataApartment[i].list[j].position + "</option>");
+                    }
+                    return;
+                }
+            }
+
+
+        }
+    });
+
+
+    $('#win-see-zh').dialog({//设置查看窗口
+        title: '账号详情',
+        href:'src/see_acount.html',
+        width: 700,
+        height: 450,
+        closed: true,
+        modal: true
+    });
+
+    //点击添加按钮
+    $("#tool-zhlb .append").click(function () {
+        $('#win-add-zh').dialog({closed: false});
+    });
+
+    //点击删除按钮
+    $("#tool-zhlb .remove").click(function () {
+        var node = $('#tb-zhlb').datagrid('getSelected');
+        if (node){
+            $.post(REQUEST_URL +"get_Delete_Account",{
+                token:TOKEN,
+                id:node.id
+            },function(data){
+                $.messager.alert('我的消息', '删除成功！', 'info');
+                $('#tb-zhlb').datagrid('reload');
+            });
+        }else{
+            $.messager.alert('我的消息', '请先选择一个账号！', 'error');
+        }
+    });
+
+    //点击修改按钮
+    $("#tool-zhlb .edit").click(function(){
+        var node = $('#tb-zhlb').datagrid('getSelected');//获得选中的行
+        if (node){//已选行
+            deliver(node.id);
+        }else{
+            $.messager.alert('我的消息', '请先选择一条账号！', 'error');
+        }
+    });
+});
+</script>

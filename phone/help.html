@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN">
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>帮助</title>
+    <link href="../../plugins/ionic-v1.3.3/css/ionic.min.css" rel="stylesheet">
+    <script src="../../plugins/ionic-v1.3.3/js/ionic.min.js"></script>
+    <script src="../../plugins/jquery-1.11.1.min.js"></script>
+</head>
+<style>
+    body{background-color:#f5f5f5}
+    .my-left{font-size:34px;color:#116099;padding-left:6px;z-index:1000;width:34px;height:34px}
+    .my-ion-problem{background:url(images/all-icon.png) no-repeat;width:32px;height:32px!important;top:10px!important}
+    .my-ion-advice{background:url(images/all-icon.png) no-repeat -32px 0;width:32px;height:32px!important;top:10px!important}
+    .ion-ios-arrow-right{color:#999}
+    .list{height:200px}
+    .item{border-color:#eee}
+    .content{margin-top:8px}
+    .item-icon-left {padding-left: 40px;}
+</style>
+<body>
+<!--<div class="bar bar-header">
+    <i class="icon ion-ios-arrow-left my-left"></i>
+    <h1 class="title">帮助</h1>
+</div>-->
+
+<div class="content ionic-pseudo">
+    <div class="list">
+
+        <a class="item item-icon-left item-icon-right" href="#">
+         <!--   <i class="icon my-ion-problem"></i>-->
+            <i class="icon"><img src="images/09.png" style="height: 20px" alt=""/></i>
+            如何报价
+            <i class="icon ion-ios-arrow-right"></i>
+        </a>
+
+        <a class="item item-icon-left item-icon-right" href="#">
+            <i class="icon"><img src="images/01.png" style="height: 20px" alt=""/></i>
+          <!--  <i class="icon my-ion-advice"></i>-->
+            合同查看
+            <i class="icon ion-ios-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+</body>
+
+<script>
+    $(function(){
+        $(".my-left").click(function(){
+            window.history.go(-1);
+        });
+    });
+</script>

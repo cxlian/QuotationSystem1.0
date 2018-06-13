@@ -1,0 +1,95 @@
+<div style="padding: 2px;height: 100%;box-sizing: border-box" >
+    <table id="problemList"></table>
+</div>
+<script>
+    $(function(){
+
+        $("#problemList").datagrid({
+            url: REQUEST_URL + 'Get_feed_back',
+            method: "get",
+            queryParams:{
+                token:TOKEN
+            },
+            title: "问题列表",
+            columns: [
+                [
+                    {field: "content", title: "具体内容", width: 100, align: "center"},
+                    {field: "type", title: "类型", width: 100, align: "center",formatter: function (value) {
+                        if(value==1) return "功能异常";
+                        if(value==2) return "产品建议";
+                        if(value==3) return "其他问题";
+                    }},
+                    {field: "id", title: "ID", width: 100, align: "center",hidden:true},
+                    {field: "createTime", title: "创建时间", width: 100, align: "center",
+                        formatter: function(value){return timeStamp2String(value);}},
+                    {field:"_operate",title: "操作",width:50,align:"center",formatter:function(val,row,index){
+                        return '<a href="javascript:readRow('+row.id+');" style="color: #0000ff;font-size: 12px;">查看</a>' +
+                                '&nbsp;&nbsp;' +
+                                '<a href="javascript:deleteRow('+row.id+');" style="color: #0000ff;font-size: 12px;">删除</a>'
+                    }}
+                ]
+            ]
+        });
+    });
+
+    function readRow(id) {
+        var dialog = $('<div/>').dialog({
+            title: '查看问题',
+            width: 400,
+            height: 330,
+            closed:false,
+            href: 'src/win-see-problem.html',
+            onClose:function(){
+                $(this).dialog("destroy");
+            },
+            onOpen:function(){
+                $.ajax({
+                    type: "get",
+                    url:REQUEST_URL+"Get_feed_back_info",
+                    data:{
+                      id:id
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        if(data.code===0){
+                            if(data.result.type===1){
+                                dialog.find(".type").html("功能异常");
+                            }
+                            if(data.result.type===2){
+                                dialog.find(".type").html("产品建议");
+                            }
+                            if(data.result.type===3){
+                                dialog.find(".type").html("其他问题");
+                            }
+                            dialog.find(".createUser").html(data.result.createUser);
+                            dialog.find(".createTime").html(timeStamp2String(data.result.createTime));
+                            dialog.find(".mysuggest").html(data.result.suggest);
+                            dialog.find(".mycontent").html(data.result.content);
+                        }else{
+                            $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');//弹出信息
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function deleteRow(id) {
+        var node = $('#problemList').datagrid('getSelected');//获得选中的行
+        if (node){//已选行
+            $.post(REQUEST_URL +"Delete_feed_back",{
+                token:TOKEN,
+                id:id
+            },function(data){
+                if (data.code === 0) {
+                    $.messager.alert('我的消息', '删除成功！', 'info');
+                    $('#problemList').datagrid('reload');
+                }else{
+                    $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                }
+            });
+        }else{
+            $.messager.alert('我的消息', '请先选择一个问题！', 'error');
+        }
+    }
+</script>

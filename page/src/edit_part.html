@@ -1,0 +1,35 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">配件名称</label>
+            <input required="true" class="easyui-textbox parkName" name="parkName" data-options="validType:'maxLength[100]'" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">材料</label>
+            <input required="true" class="easyui-textbox materialStandard" name="materialStandard" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">单位</label>
+            <input required="true" class="easyui-textbox unit" name="unit" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">通用情况</label>
+            <input required="true" class="easyui-textbox productDetail" name="productDetail" type="text"/>
+        </div>
+        <div class="form-line">
+            <label>备注</label>
+            <input class="easyui-textbox remark" name="remark" data-options="validType:'maxLength[250]'" type="text"/>
+        </div>
+    </div>
+</form>
+<script>
+    $(function(){
+        /*初始化表格*/
+        var selectMsg = $('#tb-pjlb').datagrid('getSelected');
+        $("#win-edit-pj-basic .parkName").val(selectMsg.parkName);
+        $("#win-edit-pj-basic .materialStandard").val(selectMsg.materialStandard);
+        $("#win-edit-pj-basic .unit").val(selectMsg.unit);
+        $("#win-edit-pj-basic .productDetail").val(selectMsg.productDetail);
+        $("#win-edit-pj-basic .remark").val(selectMsg.remark);
+    });
+</script>

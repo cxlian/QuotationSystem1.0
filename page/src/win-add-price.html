@@ -1,0 +1,48 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label>设备名称</label>
+            <span class="equipmentName onlyread"></span>
+        </div>
+        <div class="form-line">
+            <label>设备型号</label>
+            <span class="equipmentTypeName onlyread"></span>
+        </div>
+        <div class="form-line">
+            <label>单位</label>
+            <span class="unit onlyread"></span>
+        </div>
+        <div class="form-line">
+            <label class="required">材料</label>
+            <input required="true" class="easyui-textbox" data-options="validType:'maxLength[100]'" name="materialName" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">单重成本/吨</label>
+            <input class="easyui-numberbox price"  name="materialCostPrice" type="text"/>
+        </div>
+<!--        <div class="form-line">
+            <label class="required">修改价格原因</label>
+            <input required="true" class="easyui-textbox"  name="reason" type="text"/>
+        </div>-->
+    </div>
+</form>
+
+<script>
+    $(function(){
+        var selectMsg = $('#priceList').datagrid('getSelected');
+        var node = $('#allEquipType').tree('getSelected');
+        var node1 = $('#allEquipType').tree('getParent',node.target);
+        $(".equipmentName").html(node1.text);
+        $(".equipmentTypeName").html(node.text);
+        $(".unit").html(node.unit);
+
+            $('.price').numberbox({
+                required : true,
+                min:0,
+                max:100000000,
+                precision:2,
+                missingMessage:"请输入数字"
+            });
+
+    });
+</script>

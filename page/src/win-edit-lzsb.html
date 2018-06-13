@@ -1,0 +1,23 @@
+<div class="content">
+    <form>
+        <div class="form-line">
+            <label for="edit-sbmc" class="required">设备名称</label>
+            <input required="true" id="edit-sbmc" class="textbox easyui-textbox"
+                   data-options="validType:'maxLength[100]'" type="text"/>
+        </div>
+        <div class="form-line">
+            <label for="edit-sbwz" class="required">设备位置</label>
+            <select name="" id="edit-sbwz" class="textbox">
+                <option value="0">线内</option>
+                <option value="1">线外</option>
+            </select>
+        </div>
+    </form>
+</div>
+<script>
+    $(function () {
+        var node = $('#tt-lzsb2').tree('getSelected');
+        $('#edit-sbmc').val(node.text);
+        $('#edit-sbwz').val(node.lineType);
+    })
+</script>

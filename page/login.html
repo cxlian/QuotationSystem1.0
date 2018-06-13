@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link rel="SHORTCUT ICON" href="../images/icon.png">
+    <link rel="stylesheet" type="text/css" href="../themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../themes/icon.css">
+    <script src="../js/public.js"></script>
+</head>
+<style>
+    #login{padding:6px 0 0 0}
+    p{padding:4px 0 0 25px;height:22px;line-height:22px}
+    .textbox{padding:0 2px;height:22px}
+    #btn{text-align:center}
+    .easyui-linkbutton{padding:0 10px}
+</style>
+<body>
+    <div id="login">
+        <form>
+            <p>管理员帐号：<input type="text" name="loginName" id="manager" class="textbox"></p>
+            <p>管理员密码：<input type="password" name="passWord" id="password" class="textbox"></p>
+        </form>
+    </div>
+
+    <div id="btn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-logingo">登录</a>
+    </div>
+</body>
+
+<script type="text/javascript" src="../jquery.min.js"></script>
+<script type="text/javascript" src="../jquery.easyui.min.js"></script>
+<script src="../locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="../js/jquery.cookie.js"></script>
+<script>
+
+    $(function () {
+        $("#login").keydown(function() {
+            if (event.keyCode == "13") {//keyCode=13是回车键
+                    loginClick();
+                return;
+            }
+        });
+
+        $('#login form').form("clear");
+
+        //登录界面
+        $('#login').dialog({
+            title : '后台登录',
+            width : 310,
+            height : 190,
+            modal : true,
+            iconCls : 'icon-login',
+            buttons : '#btn',
+            draggable:false,
+            closable:false
+        });
+
+        //管理员帐号验证
+        $('#manager').validatebox({
+            required : true,
+            missingMessage : '请输入管理员帐号',
+            invalidMessage : '管理员帐号不得为空'
+        });
+
+        //管理员密码验证
+        $('#password').validatebox({
+            required : true,
+            validType : 'length[6,8]',
+            missingMessage : '请输入管理员密码',
+            invalidMessage : '管理员密码为6-8位'
+        });
+
+        //加载时判断验证
+        if (!$('#manager').validatebox('isValid')) {
+            $('#manager').focus();
+        } else if (!$('#password').validatebox('isValid')) {
+            $('#password').focus();
+        }
+
+        //保存登录信息
+        function saveLogin(data){
+            $.cookie('department', data.department, { expires: 7 });
+            $.cookie('deptID', data.deptID, { expires: 7 });
+            $.cookie('gender', data.deptID, { expires: 7 });
+            $.cookie('id', data.id, { expires: 7 });
+            $.cookie('name', data.name, { expires: 7 });
+            $.cookie('phone', data.phone, { expires: 7 });
+            $.cookie('position', data.position, { expires: 7 });
+            $.cookie('price', data.price, { expires: 7 });
+            $.cookie('role', data.role, { expires: 7 });
+            $.cookie('token', data.token, { expires: 7 });
+          /*  debugger;*/
+     /*       console.log("$.cookie('id'):"+$.cookie('id'));*/
+        }
+
+        //登录请求
+        function ajaxLogin(){
+            $.ajax({
+                type: "POST",
+                url:REQUEST_URL_LOGIN,
+                data:  $.param({
+                    'equipment':'come from window8',
+                    'version':'pc'
+                }) + '&' + $('#login form').serialize(),
+                dataType: "json",
+                success: function (data) {
+
+                    if(data.code===0){
+                        window.location.href="index.html";
+                        saveLogin(data.result);
+                    }else if(data.code===99){
+                        $.messager.alert('我的消息', '用户帐号或密码错误', 'error');//弹出信息
+                    }else{
+                        $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');//弹出信息
+                    }
+
+                }
+            });
+        }
+
+        function loginClick(){
+            if (!$('#manager').validatebox('isValid')) {
+                $('#manager').focus();
+            } else if (!$('#password').validatebox('isValid')) {
+                $('#password').focus();
+            } else {
+                ajaxLogin();
+            }
+        }
+
+        //单击登录
+        $('#btn a').click(function () {
+            loginClick();
+        });
+    });
+</script>
+</html>

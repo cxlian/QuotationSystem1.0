@@ -1,0 +1,31 @@
+<!--<div style="display: none">设备ID：  <span id="sbid"></span></div>
+<div style="display: none">设备名称：  <span id="sbmc"></span></div>
+<div style="display: none">设备位置：  <span id="sbwz"></span></div>-->
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">型号名称</label>
+            <input required="true" class="easyui-textbox" name="equipmentTypeName" data-options="validType:'maxLength[100]'" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">设备单位</label>
+            <input required="true" class="easyui-textbox" name="unit" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">技术特点</label>
+            <input required="true" class="easyui-textbox" name="technology" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">工艺参数</label>
+            <input required="true" class="easyui-textbox" name="parameter" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">设备单重</label>
+            <input required="true" class="easyui-numberbox" missingMessage="请输入数字，格式为X.XX"  data-options="min:0,max:100000000,precision:2"  name="equipmentWeight" type="text"/>
+        </div>
+        <div class="form-line">
+            <label>版本信息</label>
+            <input class="easyui-textbox" name="remark" data-options="validType:'maxLength[250]'" type="text"/>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,455 @@
+<style>
+    #tt-lzsb2 .tree-file{background:url(../themes/icons/zong.png) no-repeat 0 0}
+</style>
+<div class="easyui-layout" style="height: 100%;">
+
+    <div class="myWest" data-options="region:'west',title:'连铸设备列表',collapsible:false,border:false,noheader:true"
+         style="padding:2px">
+        <div class="easyui-panel fl" id="panel-btn-lzsb" title="连铸设备" style="width:100%;height:100%;padding:10px;">
+            <ul id="tt-lzsb2"></ul>
+        </div>
+    </div>
+    <div data-options="region:'center',title:'连铸型号列表',collapsible:false,border:false,noheader:true"
+         style="padding:2px;">
+        <div id="tool-lzsb" style="padding:5px;">
+            <div>
+                <a href="javascript:void(0);"  class="easyui-linkbutton append" plain="true" iconCls="icon-myadd">添加型号</a>
+                <a href="javascript:void(0);" class="easyui-linkbutton edit" plain="true" iconCls="icon-myedit">修改型号</a>
+                <a href="javascript:remove();" class="easyui-linkbutton" plain="true" iconCls="icon-myremove">删除型号</a>
+            </div>
+            <div style="padding:5px 0 5px 7px;color:#333;">
+                按设备查找： <select name="" id="key-lzsb" class="textbox" style="width: 110px">
+                <option value="9999">全部</option>
+            </select>
+                &nbsp;&nbsp;&nbsp;&nbsp;按型号查找：<input type="text" id="key-lzxh" class="easyui-textbox" name="user" style="width:110px">
+                <a href="javascript:search_btn();" class="easyui-linkbutton" iconCls="icon-search">查询</a>
+            </div>
+        </div>
+
+        <table id="tb-lzsb" style="width: 100%"></table>
+    </div>
+</div>
+
+<div id="win-see-xh"></div>
+<div id="win-add-xh"></div>
+<div id="win-add-lzsb"></div>
+<div id="win-edit-lzsb"></div>
+
+<script>
+    var editIndex = undefined;
+    var editIndex2 = undefined;
+
+
+    function append2(){
+        $('#win-add-lzsb').dialog({closed: false});
+    }
+
+    function edit2(){//点击修改设备按钮
+        var node = $('#tt-lzsb2').tree('getSelected');
+        if (node){
+            $('#win-edit-lzsb').dialog({closed: false});
+        }else{
+            $.messager.alert('我的消息', '请先选择一条要修改的设备信息！', 'error');
+        }
+    }
+
+    //输入设备型号查找
+    function search_btn(){
+        var content;
+        if ($('#key-lzsb:eq(0)').val() < 6666) {
+            content = $('#key-lzsb').val();
+        } else {
+            content = undefined;
+        }
+        $("#tb-lzsb").datagrid({
+            url: REQUEST_URL + 'Get_Continuous_Casting_Equipment_List',//表格数据
+            method: "get",
+            queryParams: {
+                token: TOKEN,
+                equipmentTypeName: $("#key-lzxh").val(),
+                equipmentId: content
+            }
+        });
+/*        }*/
+
+    }
+
+    function remove() {//点击删除按钮
+        if (editIndex == undefined) {
+            $.messager.alert('我的消息', '请先选择一条型号信息！', 'error');
+        } else {
+            $.messager.confirm('确认对话框', '您确定要删除吗？', function (r) {
+                if (r) {
+                    //发起添加请求
+                    $.post(REQUEST_URL + "Import_DELETE_Equipment_Version", {
+                                versionId: $('#tb-lzsb').datagrid('getSelected').versionId,
+                                token: TOKEN
+                            },
+                            function (data) {
+                                $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                                $('#tb-lzsb').datagrid('reload');//刷新数据
+                                editIndex = undefined;
+                            }
+                    );
+                }
+            });
+        }
+    }
+
+    function remove2() {//删除连铸设备
+        var node = $('#tt-lzsb2').tree('getSelected');
+        if (node){
+            $.post(REQUEST_URL +"Import_DELETE_Equipment",{
+                token:TOKEN,
+                equipmentId:node.id
+            },function(data){
+                $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                $('#tb-lzsb').datagrid('reload');//刷新表格
+                reloadTree($('#tt-lzsb2'));
+            });
+        }else{
+            $.messager.alert('我的消息', '请先选择一条要删除的设备信息！', 'error');
+        }
+    }
+
+    function operateSee_xh(index){//查看详情
+        $('#win-see-xh').dialog({closed: false,
+            queryParams: { versionId: index }
+        });//关闭弹窗
+    }
+
+$(function(){
+
+    $(".myWest").css("width",$(".tree-node").width()+36);
+
+    $("#tool-lzsb .append").click(function(){
+        //做个判断，如果没有选择部门不弹窗
+        if ($("#key-lzsb").val() >6666) {
+            $.messager.alert('我的消息', '请先选择一个设备！', 'error');
+        } else {
+            $('#win-add-xh').dialog({closed: false});
+        }
+    });
+    $('#panel-btn-lzsb').panel({
+        tools: [{
+            iconCls:'icon-add',
+            handler:function(){
+                append2();
+            }
+        },{
+            iconCls:'icon-edit',
+            handler:function(){
+                edit2();
+            }
+        },{
+            iconCls:'icon-remove',
+            handler:function(){
+                remove2();
+            }
+        }]
+    });
+
+    $(".right-panel").css("width",($(".con").width()-$(".left-panel").width()+32)+'px');
+   // $(".width-panel").width();
+
+    $("#tool-lzsb .edit").click(function(){
+        var selectMsg = $('#tb-lzsb').datagrid('getSelected');
+        if(selectMsg){
+            operateSee_xh(selectMsg.versionId);
+        }else{
+            $.messager.alert('我的消息', '请先选择一条型号信息！', 'error');
+        }
+    });
+
+    $('#win-see-xh').dialog({
+        title: '查看',
+        href:'src/win-see-xh.html',
+        width: 500,
+        height: 500
+    });
+
+    $('#fb').filebox({
+        buttonText: '选择文件',
+        multiple:true
+    });
+
+
+
+    function nowRow(index) {
+        if (editIndex != index) {
+            $('#zw').datagrid('selectRow', index);
+            editIndex = index;
+        }
+    }
+
+    $("#tb-lzsb").datagrid({
+        url: REQUEST_URL+'Get_Continuous_Casting_Equipment_List',//表格数据
+        method:"get",
+        queryParams: {
+            token:TOKEN
+        },
+        onClickRow: nowRow,//点击执行
+        toolbar: "#tool-lzsb",//工具栏
+        title: "型号列表",//标题
+        columns: [
+            [
+                {field: "versionId", title: "型号ID",width:100,align: "center",hidden:true},
+                {field: "equipmentName", title: "设备名",width:$(this).width() * 0.2,align: "center"},
+                {field: "equipmentTypeName", title: "型号", width:$(this).width() * 0.4, align: "center"},
+                {field: "lineType", title: "设备位置",width:$(this).width() * 0.2,  align: "center"},
+                {field: "paramter", title: "工艺参数", width:$(this).width() * 0.2, align: "center"},
+                {field: "equipmentWeight", title: "设备重量/吨",width:$(this).width() * 0.2, align: "center"},
+                {field: "unit", title: "设备单位",width:$(this).width() * 0.2, align: "center"},
+                {field: "technology", title: "技术特点", width:$(this).width() * 0.2, align: "center",hidden:true},
+                {field: "createTime", title: "添加时间",width:$(this).width() * 0.2, align: "center"},
+                {field:"_operate",title: "操作",width:$(this).width() * 0.2,align:"center",formatter:function(val,row,index){
+                    return '<a href="javascript:;" style="color: #0000ff;font-size: 12px;" onclick="operateSee_xh('+row.versionId+')">查看</a>'
+                }}
+            ]
+        ],
+        onLoadSuccess:function(data){
+       //     console.log(data);
+          //  console.log("连铸型号列表读取完成");
+        }
+    });
+
+    function search_lzsb() {//据设备搜索型号
+        /* console.log("搜索职位");*/
+        var content;
+
+        if ($('#key-lzsb:eq(0)').val() < 6666) {
+            content = $('#key-lzsb').val();
+        } else {
+            content = undefined;
+        }
+        $("#tb-lzsb").datagrid({
+            url: REQUEST_URL + 'Get_Continuous_Casting_Equipment_List',//表格数据
+            method: "get",
+            queryParams: {
+                equipmentId: content,
+                equipmentTypeName: $("#key-lzxh").val()
+            }
+        });
+
+    }
+
+    $('#key-lzsb').change(function () {//下拉框变化时执行
+        if ($(this).val() < 6666) {
+            var select_node = $('#tt-lzsb2').tree('find', $(this).val());
+            $('#tt-lzsb2').tree('select', select_node.target);
+        }else{
+            //选择全部，列表无选择
+            $("#tt-lzsb2").find(".tree-node").removeClass("tree-node-selected");
+        }
+        search_lzsb();
+    });
+
+
+    $('#tt-lzsb2').tree({//设置树
+        url: REQUEST_URL+"Get_Equipment_List",//数据
+        queryParams:{
+            token:TOKEN,
+            children:0
+        },
+        method:"get",
+        onClick: function (node) {
+          $("#key-lzsb").val(node.id);//关联下拉
+          search_lzsb();//执行搜索
+       },
+        onLoadSuccess:function(node,data){
+            $("#key-lzsb").children("option").not(":eq(0)").remove();
+            for (var i = 0; i < data.length; i++) {//设置下拉框
+                $("#key-lzsb").append("<option value='" + data[i].id + "'>" + data[i].text + "</option>");
+            }
+        }
+    });
+
+
+
+
+    function add_xh() {//增加字段
+        var node = $('#tt-lzsb2').tree('getSelected');
+        var form = $('#win-add-xh form');//获取表单
+        if (form.form("validate")) {
+            $.ajax({
+                type: "POST",
+                url: REQUEST_URL + "Import_Add_Continuous_Casting_Equipment",
+                data: $.param({
+                    'token': TOKEN,
+                    'equipmentId': node.id
+                }) + '&' + form.serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.code === 0) {
+                        $('#win-add-xh').dialog({closed: true});//关闭弹窗
+                        $.messager.alert('我的消息', '新增成功！', 'info');//弹出信息
+                        $('#tb-lzsb').datagrid('reload');//刷新数据
+                    }else{
+                        $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                    }
+                }
+            });
+        }
+    }
+
+    $('#win-add-xh').dialog({//设置新增窗口
+        title: '新增',
+        width: 370,
+        height: 400,
+        href:'src/win-add-xh.html',
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    add_xh();//增加
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-add-xh').dialog({closed: true});
+                }
+            }
+        ]
+    });
+
+   /* function save_xh() {//保存修改的数据
+
+            $.post(REQUEST_URL + "Import_Update_Continuous_Casting_Equipment", {
+                        token: TOKEN,
+                        versionId: $('#tb-lzsb').datagrid('getSelected').versionId,
+                        technology: $("#mod-technology").val(),
+                        parameter: $("#mod-parameter").val(),
+                        equipmentWeight: $("#mod-equipmentWeight").val(),
+                        equipmentTypeName: $("#mod-equipmentTypeName").val(),
+                        unit: $("#mod-unit").val()
+                    },
+                    function (data) {
+                        $('#edit-xh').dialog({closed: true});//关闭弹窗
+                        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                        $('#tb-lzsb').datagrid('reload');//刷新数据
+                        editIndex = undefined;
+                    }
+            );
+    }*/
+
+    function save() {//保存修改的设备
+        //发起添加请求
+        var node = $('#tt-lzsb2').tree('getSelected');
+        if (node) {
+            var form = $('#win-edit-lzsb form');//获取表单
+            if (form.form("validate")) {
+                $.post(REQUEST_URL + "Import_Update_Equipment", {
+                    token: TOKEN,
+                    equipmentId: node.id,
+                    equipmentName: $("#edit-sbmc").val(),
+                    lineType: $("#edit-sbwz").val(),
+                    equipmentType: 1
+                }, function (data) {
+                    //  console.log(data);
+                    reloadTree($('#tt-lzsb2'));
+                    $('#win-edit-lzsb').dialog({closed: true});//关闭弹窗
+                    $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                })
+            }
+        }
+    }
+
+    function save_tj() {
+        var form = $('#win-add-lzsb form');//获取表单
+        if (form.form("validate")) {
+            $.ajax({
+                url: REQUEST_URL + "Import_Add_Equipment",
+                method: 'post',
+                data: {
+                    equipmentName: $("#add-sbmc").val(),
+                    lineType: $("#add-sbwz").val(),
+                    equipmentType: 1
+                },
+                success: function (data) {
+                    if (data.code == 0) {
+                        $('#win-add-lzsb').dialog({closed: true});//关闭弹窗
+                        $.messager.alert('我的消息', '添加成功！', 'info');//弹出信息
+                        $('#tb-lzsb').datagrid('reload');//刷新表格
+                        reloadTree($('#tt-lzsb2'));//刷新树
+                    } else {
+                        $.messager.alert('我的消息', '操作失败,请联系管理员！', 'error');//弹出信息
+                    }
+                }
+            });
+        }
+    }
+
+    $('#edit-xh').dialog({//设置修改窗口
+        title: '修改',
+        width: 370,
+        height: 360,
+        closed: true,
+        modal: true,
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    save_xh();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#edit-xh').dialog({closed: true});
+                }
+            }
+        ],
+        onOpen: function () {
+            $('#mod-equipmentTypeName').val($('#tb-lzsb').datagrid('getSelected').equipmentTypeName);
+            $('#mod-unit').val($('#tb-lzsb').datagrid('getSelected').unit);
+            $('#mod-technology').val($('#tb-lzsb').datagrid('getSelected').technology);
+            $('#mod-parameter').val($('#tb-lzsb').datagrid('getSelected').paramter);
+            $('#mod-equipmentWeight').val($('#tb-lzsb').datagrid('getSelected').equipmentWeight);
+        }
+    });
+
+    $('#win-edit-lzsb').dialog({//设置修改设备窗口
+        title: '修改设备',
+        width: 390,
+        height: 240,
+        href:'src/win-edit-lzsb.html',
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    save();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-edit-lzsb').dialog({closed: true});
+                }
+            }
+        ]
+    });
+
+    $('#win-add-lzsb').dialog({//设置添加设备窗口
+        title: '添加设备',
+        width: 390,
+        height: 240,
+        href:"src/win-add-lzsb.html",
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    save_tj();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-add-lzsb').dialog({closed: true});
+                }
+            }
+        ]
+    });
+});
+
+</script>

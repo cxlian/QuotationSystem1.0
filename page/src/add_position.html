@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>表单控件</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="../../css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../css/simple-line-icons.css">
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../../css/components.css">
+</head>
+<body style="background: #fff">
+<div class="section-wrapper clearfix" style="padding: 0">
+    <div class="comp-ui col-sm-6 clearfix">
+        <div class="comp-content col-md-12">
+            <div class="portlet">
+                <div class="portlet-body">
+                    <form class="form-horizontal pd-15" role="form">
+                        <div class="form-body">
+                            <div class="clearfix">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label class="col-xs-2 control-label" style="display: none">部门ID：</label>
+                                            <div class="col-xs-4"  style="display: none">
+                                                <div id="departmentID"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-xs-2 control-label">部门名称：</label>
+                                                <div class="col-xs-4">
+                                                    <div id="deptName"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-xs-2 control-label">职位名称：</label>
+                                        <div class="col-xs-4">
+                                            <input type="text" class="form-control " value="" id="positionName" placeholder="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-6">
+                                    <button type="submit" class="btn green submit">保存</button>
+                                    <button type="button" class="btn default cancel">取消</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- .comp-content End -->
+    </div>
+
+
+
+</div>
+<script src="../../jquery.min.js"></script>
+<script src="../../jquery.easyui.min.js"></script>
+<script>
+    var index = parent.layer.getFrameIndex(window.name); //获取窗口索引
+    $(".submit").click(function () {
+        window.parent.save();//获取父页面的方法
+        parent.layer.close(index);
+    });
+    $(".cancel").click(function () {
+        parent.layer.close(index);
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+<form>
+    <div class="content">
+        <div class="form-line">
+            <label class="required">数量</label>
+            <input required="true" class="easyui-textbox number" name="number" type="text"/>
+        </div>
+        <div class="form-line">
+            <label class="required">单重</label>
+            <input required="true" class="easyui-textbox weight" name="weight" type="text"/>
+        </div>
+        <div class="form-line">
+            <label>备注</label>
+            <input class="easyui-textbox remark" name="remark" type="text"/>
+        </div>
+    </div>
+    <div style="width:100%;text-align: center;">
+        <a href="javascript:void (0)" class="easyui-linkbutton btn" style="width: 100px;margin-top: 20px">保存</a>
+    </div>
+</form>
+
+<script>
+    $(function(){
+        var obj = $('#win-edit-zj').dialog('options');//获得窗口对象
+        var queryParams = obj["queryParams"];//获得窗口额外参数 queryParams.account_id 用户名ID
+
+        $("#win-edit-zj .number").val(queryParams.number);
+        $("#win-edit-zj .weight").val(queryParams.weight);
+        $("#win-edit-zj .remark").val(queryParams.remark);
+
+
+        $("#win-edit-zj .btn").click(function(){
+            var form = $('#win-edit-zj form');//获取表单
+            $.ajax({
+                type: "POST",
+                url: REQUEST_URL + "Import_Update_Module",
+                data: $.param({
+                    'token':TOKEN,
+                    'id': queryParams.id
+                }) + '&' + form.serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.code === 0) {
+                        $('#win-edit-zj').dialog({closed: true});//关闭弹窗
+                        $('#overAllList').datagrid('reload');//刷新数据
+                        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                    }else{
+                        $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');
+                    }
+                }
+            });
+        });
+    });
+</script>

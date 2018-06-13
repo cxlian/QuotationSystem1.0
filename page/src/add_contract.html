@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="../../jquery.easyui.min.js"></script>
+</head>
+<body>
+<!--
+合同ID    contractID=2&
+客户id    customerID=2&
+合同金额    contractAmount=112&
+已接收金额    receiveAmount=1&
+未接受金额    noReceiveAmount=111&
+签约时间    contractTime=2008-12-01 11:00:01&
+下次跟进时间    nextTime=2008-12-02 11:00:01&
+合同进度    customerProgress=4&
+token=1233
+-->
+
+    <div class="form-line">
+        <label for="contractID">合同ID</label>
+        <input id="contractID" type="text" value="2" readonly/>
+    </div>
+
+    <div class="form-line">
+        <label for="customerID">客户ID</label>
+        <input id="customerID" type="text" value="2" readonly/>
+    </div>
+
+    <div class="form-line">
+        <label for="contractAmount">合同金额</label>
+        <input id="contractAmount" type="text" value="112" readonly/>
+    </div>
+
+    <div class="form-line">
+        <label for="receiveAmount">已接收金额</label>
+        <input id="receiveAmount" type="text" value="1" readonly/>
+    </div>
+
+    <div class="form-line">
+        <label for="noReceiveAmount">未接受金额</label>
+        <input id="noReceiveAmount" type="text" value="1" readonly/>
+    </div>
+
+    <div class="form-line">
+        <label for="contractTime">签约时间</label>
+        <input id="contractTime" class="easyui-datetimebox" name="birthday" value="3/4/2010 2:3">
+    </div>
+
+    <div class="form-line">
+        <label for="nextTime">下次跟进时间</label>
+        <input id="nextTime" class="easyui-datetimebox" name="birthday" value="3/4/2010 2:3">
+    </div>
+
+    <div class="form-line">
+        <label for="customerProgress">合同进度</label>
+        <input id="customerProgress" type="text" value="2008-12-01 11:00:01&" readonly/>
+    </div>
+
+</body>
+</html>

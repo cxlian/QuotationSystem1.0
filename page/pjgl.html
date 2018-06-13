@@ -1,0 +1,490 @@
+<style>
+    #tt-lzsb .tree-file{background:url(../themes/icons/zong.png) no-repeat 0 0}
+</style>
+
+<div class="easyui-layout" style="height: 100%;">
+    <div class="myWest" data-options="region:'west',title:'LEFT',collapsible:false,border:false,noheader:true"
+         style="padding:2px">
+        <div class="easyui-panel fl" title="连铸设备" style="width:100%;height:100%;padding:10px;">
+            <ul id="tt-lzsb"></ul>
+        </div>
+    </div>
+
+    <div data-options="region:'center',title:'RIGHT',collapsible:false,border:false,noheader:true"
+         style="padding:2px;">
+        <div id="tool-pjlb" style="padding:5px;">
+            <div>
+                <a href="javascript:append()" id="append" class="easyui-linkbutton" plain="true"
+                   iconCls="icon-myadd">添加</a>
+                <a href="javascript:void (0);" class="easyui-linkbutton admin-edit-basic" plain="true" iconCls="icon-myedit">修改基本信息</a>
+                <a href="javascript:void (0);" class="easyui-linkbutton edit" plain="true" iconCls="icon-myedit">修改价格</a>
+                <a href="javascript:void (0);" class="easyui-linkbutton admin-edit" plain="true" iconCls="icon-myedit">修改系数</a>
+                <a href="javascript:void (0);" class="easyui-linkbutton remove" plain="true" iconCls="icon-myremove">删除</a>
+            </div>
+            <div style="padding:5px 0 5px 7px;color:#333;">
+                按设备查找： <select name="" id="key-lzsb-pj" class="textbox" style="width: 110px">
+                <option value="9999">全部</option>
+            </select>
+                &nbsp;&nbsp;&nbsp;&nbsp;按配件查找：<input type="text" id="key-pj" class="textbox" name="user"
+                                                     style="width:110px">
+                <a href="javascript:void(0);" class="easyui-linkbutton search_btn" iconCls="icon-search">查询</a>
+            </div>
+        </div>
+        <table id="tb-pjlb" style="width: 100%;box-sizing: border-box"></table>
+    </div>
+</div>
+
+<!--新增窗口-->
+<div id="win-add-pj"></div>
+
+<!--修改基本资料窗口-->
+<div id="win-edit-pj-basic"></div>
+
+<!--修改窗口-->
+<div id="win-edit-pj"></div>
+
+<!--修改系数窗口-->
+<div id="win-edit-xs"></div>
+
+<!--历史价格窗口-->
+<div id="win-history"></div>
+
+<script>
+var editIndex = undefined;
+
+function append() {//点击新增按钮
+    if ($("#key-lzsb-pj").val() >6666) {
+        $.messager.alert('我的消息', '请先选择一个连铸设备！', 'error');
+    } else {
+        $('#win-add-pj').dialog({closed: false});
+    }
+}
+
+function remove() {//点击删除按钮
+    if (editIndex == undefined) {
+        $.messager.alert('我的消息', '请先选择一条职位信息！', 'error');
+    } else {
+        $.messager.confirm('确认对话框', '您确定要删除吗？', function (r) {
+            if (r) {
+                //发起添加请求
+                $.get(REQUEST_URL + "Delete_Position", {
+                            positionID: $('#zw').datagrid('getSelected').id,
+                            token: TOKEN
+                        },
+                        function (data) {
+                            $.messager.alert('我的消息', '删除成功！', 'info');//弹出信息
+                            $('#zw').datagrid('reload');//刷新数据
+                            editIndex = undefined;
+                        }
+                );
+            }
+        });
+    }
+}
+
+function operateHistory(){
+    $('#win-history').dialog({closed: false,maximized:true});
+}
+
+$(function() {
+    $(".myWest").css("width",$(".tree-node").width()+36);
+
+    <!--判断是否为管理员-->
+    if($.cookie('role')==0){//如果是管理员
+        $("#tool-pjlb .edit").hide();
+    }else{
+        $("#tool-pjlb .admin-edit").hide();
+    }
+
+    $("#tool-pjlb .edit").click(function () {
+        var node = $('#tb-pjlb').datagrid('getSelected');
+        if (node) {//已选行
+            $('#win-edit-pj').dialog({closed: false});
+        }else{
+            $.messager.alert('我的消息', '请先选择一个配件！', 'error');
+        }
+    });
+
+    $("#tool-pjlb .remove").click(function () {
+        var node = $('#tb-pjlb').datagrid('getSelected');
+        if (node){//已选行
+            $.post(REQUEST_URL +"Import_Delete_Park",{
+                token:TOKEN,
+                parkId:node.id
+            },function(data){
+                if(data.errorDesc=="操作成功"){
+                    $.messager.alert('我的消息', '删除成功！', 'info');
+                    $('#tb-pjlb').datagrid('reload');
+                }
+            });
+        }else{
+            $.messager.alert('我的消息', '请先选择一个配件！', 'error');
+        }
+    });
+
+    $("#tool-pjlb .admin-edit-basic").click(function(){
+        var node = $('#tb-pjlb').datagrid('getSelected');//获得选中的行
+        if (node){//已选行
+            $('#win-edit-pj-basic').dialog({closed: false});
+        }else{
+            $.messager.alert('我的消息', '请先选择一个配件！', 'error');
+        }
+    });
+
+    $("#tool-pjlb .admin-edit").click(function(){
+        var node = $('#tb-pjlb').datagrid('getSelected');//获得选中的行
+        if (node){//已选行
+            $('#win-edit-xs').dialog({closed: false});
+        }else{
+            $.messager.alert('我的消息', '请先选择一个配件！', 'error');
+        }
+    });
+
+    $("#tool-pjlb .search_btn").click(function(){
+        var content;
+        if ($('#key-lzsb-pj:eq(0)').val() < 6666) {
+            content = $('#key-lzsb-pj').val();
+        } else {
+            content = undefined;
+        }
+        $("#tb-pjlb").datagrid({//设置职位表格
+            url: REQUEST_URL + 'Get_Continuous_Casting_Park_List',//表格数据
+            method: "get",
+            queryParams: {
+                token:TOKEN,
+                status:1,
+                parkName: $("#key-pj").val(),
+                equipmentId:content
+            }
+        });
+    });
+
+    function nowRow(index) {
+        if (editIndex != index) {
+            $('#zw').datagrid('selectRow', index);
+            editIndex = index;
+        }
+    }
+
+    $('#tt-lzsb').tree({//设置树
+        url: REQUEST_URL+"Get_Equipment_List",//数据
+        queryParams:{
+            token:TOKEN,
+            children:0
+        },
+        method:"get",
+        onClick: function (node) {
+           // console.log(node.id);
+            $("#key-lzsb-pj").val(node.id);//关联下拉
+            search_pj();
+        },
+        onLoadSuccess:function(node,data){
+            // console.log(data);
+           for (var i = 0; i < data.length; i++) {//设置下拉框
+              $("#key-lzsb-pj").append("<option value='" + data[i].id + "'>" + data[i].text + "</option>");
+           }
+        }
+    });
+
+
+
+    if($.cookie('role')==0){//如果是管理员
+        $("#tb-pjlb").datagrid({//设置职位表格
+            url: REQUEST_URL + 'Get_Continuous_Casting_Park_List',//表格数据
+            method: "get",
+            queryParams: {
+                token:TOKEN,
+                status:1
+            },
+            title: "配件列表",//标题
+            onClickRow: nowRow,//点击执行
+            toolbar: "#tool-pjlb",//工具栏
+            width:"100%",
+            columns: [
+                [
+                    {field: "equipmentId", title: "设备ID", align: "center",hidden:true},
+                    {field: "parkName", title: "配件名称", width:$(this).width() * 0.5, align: "center"},
+                    {field: "equipmentName", title: "设备", width:$(this).width() * 0.2, align: "center"},
+                    {field: "materialStandard", title: "材料", width:$(this).width() * 0.2, align: "center"},
+                    {field: "unit", title: "单位", width:$(this).width() * 0.2, align: "center"},
+                    {field: "price", title: "单价成本",width:$(this).width() * 0.2, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "minTradeRatio", title: "最低系数", width:$(this).width() * 0.2, align: "center"},
+                    {field: "minTradePrice", title: "最低价格", width:$(this).width() * 0.2, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "minTradeRatio", title: "正常交易系数", width:$(this).width() * 0.2, align: "center"},
+                    {field: "normalTradePrice", title: "正常交易价格", width:$(this).width() * 0.2, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "productDetail", title: "生产厂家通用情况", width:$(this).width() * 0.3, align: "center"},
+                    {field: "remark", title: "备注", width:$(this).width() * 0.2, align: "center"},
+                    {field:"_operate",title: "操作",width:$(this).width() * 0.2,align:"center",formatter:function(val,row,index){
+                        return '<a href="javascript:;" style="color: #0000ff;font-size: 12px;" onclick="operateHistory('+index+')">历史价格</a>'
+                    }}
+                ]
+            ]
+        });
+    }else{
+        $("#tb-pjlb").datagrid({//设置职位表格
+            url: REQUEST_URL + 'Get_Continuous_Casting_Park_List',//表格数据
+            method: "get",
+            queryParams: {
+                token:TOKEN,
+                status:1
+            },
+            title: "配件列表",//标题
+            onClickRow: nowRow,//点击执行
+            toolbar: "#tool-pjlb",//工具栏
+            columns: [
+                [
+                    {field: "equipmentId", title: "设备ID", width:$(this).width() * 0.2, align: "center",hidden:true},
+                    {field: "parkName", title: "配件名称", width:$(this).width() * 0.5, align: "center"},
+                    {field: "equipmentName", title: "设备", width:$(this).width() * 0.2, align: "center"},
+                    {field: "materialStandard", title: "材料", width:$(this).width() * 0.2, align: "center"},
+                    {field: "unit", title: "单位", width:$(this).width() * 0.2, align: "center"},
+                    {field: "price", title: "单价成本",width:$(this).width() * 0.2, align: "center", formatter: function(value, row){return formatterMoney(value, row);}},
+                    {field: "productDetail", title: "生产厂家通用情况", width:$(this).width() * 0.3, align: "center"},
+                    {field: "remark", title: "备注", width:$(this).width() * 0.2, align: "center"},
+                    {field:"_operate",title: "操作",width:$(this).width() * 0.2,align:"center",formatter:function(val,row,index){
+                        return '<a href="javascript:;" style="color: #0000ff;font-size: 12px;" onclick="operateHistory('+index+')">历史价格</a>'
+                    }}
+                ]
+            ]
+        });
+    }
+
+
+
+    function search_pj() {
+        var content;
+
+        if ($('#key-lzsb-pj:eq(0)').val() < 6666) {
+            content = $('#key-lzsb-pj').val();
+        } else {
+            content = undefined;
+        }
+        $("#tb-pjlb").datagrid({//设置职位表格
+            url: REQUEST_URL + 'Get_Continuous_Casting_Park_List',//表格数据
+            method: "get",
+            queryParams: {
+                token:TOKEN,
+                status:1,
+                equipmentId: content,
+                parkName:$('#key-pj').val()
+            }
+        });
+    }
+
+    $.get(REQUEST_URL + 'Get_Department_List', {
+        token: TOKEN
+    }, function (data) {
+        $('#tt').tree({//设置部门树
+            data: data.rows,//数据
+            onClick: function (node) {
+                // console.log(node);  // 在用户点击的时候提示
+                $("#key-zw").val(node.id);
+                search_pj();
+            }
+        });
+        for (var i = 0; i < data.rows.length; i++) {//设置下拉框
+            $("#key-zw").append("<option value='" + data.rows[i].id + "'>" + data.rows[i].deptName + "</option>");
+        }
+    });
+
+    $('#key-lzsb-pj').change(function () {//下拉框变化时执行
+
+        if ($(this).val() < 6666) {
+            var select_node = $('#tt-lzsb').tree('find', $(this).val());
+            $('#tt-lzsb').tree('select', select_node.target);
+        }else{
+            //选择全部，列表无选择
+            $("#tt-lzsb").find(".tree-node").removeClass("tree-node-selected");
+        }
+      search_pj();
+    });
+
+    function add() {//增加字段
+        var addForm = $("#win-add-pj form");//获取表单
+        var node = $('#tt-lzsb').tree('getSelected');//获取选中树
+        if (addForm.form("validate")) {
+            $.ajax({
+                type: "POST",
+                url: REQUEST_URL + "Import_Add_Park",
+                data: $.param({
+                    'token': TOKEN,
+                    equipmentId: node.id
+                }) + '&' + addForm.serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.errorDesc == "操作成功") {
+                        $('#win-add-pj').dialog({closed: true});
+                        $.messager.alert('我的消息', '新增成功！', 'info');
+                        $('#tb-pjlb').datagrid('reload');
+                    }
+                }
+            });
+        }
+    }
+
+    function add_pj_basic(){
+        var selectMsg = $('#tb-pjlb').datagrid('getSelected');//获取行
+        var form = $('#win-edit-pj-basic form');//获取表单
+        if (form.form("validate")) {
+            $.ajax({
+                type: "POST",
+                url: REQUEST_URL + "Import_Update_Park",
+                data: $.param({
+                    'token': TOKEN,
+                    'parkId': selectMsg.id,
+                    'equipmentId': selectMsg.equipmentId
+                }) + '&' + form.serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.errorDesc == "操作成功") {
+                        $('#win-edit-pj-basic').dialog({closed: true});//关闭弹窗
+                        $('#tb-pjlb').datagrid('reload');//刷新数据
+                        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                    }
+                }
+            });
+        }
+    }
+
+    $("#win-history").dialog({
+        title: '历史价格',
+        href:'src/win-history.html',
+        width:"900",
+        height:"600",
+        maximizable:true,
+        minimizable:true
+    });
+
+    $("#win-edit-pj-basic").dialog({
+        title: '修改',
+        href:'src/edit_part.html',
+        width:400,
+        height:400,
+        buttons: [
+            {
+                text: '保存',
+                handler: function () {
+                    add_pj_basic();//增加
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-edit-pj-basic').dialog({closed: true});
+                }
+            }
+        ]
+    });
+
+    $('#win-add-pj').dialog({//设置新增窗口
+        title: '新增',
+        href:'src/add_part.html',
+        width:400,
+        height:400,
+        buttons: [
+            {
+                text: '保存',
+                handler: function () {
+                    console.log("点击保存");
+                    add();//增加
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-add-pj').dialog({closed: true});
+                }
+            }
+        ]
+    });
+
+    $('#win-edit-pj').dialog({//设置修改窗口
+        title: '修改',
+        href:'src/edit_part_price.html',
+        width: 390,
+        height: 240,
+        buttons: [
+            {//底部按钮
+                text: '保存',
+                handler: function () {
+                    save();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-edit-pj').dialog({closed: true});
+                }
+            }
+        ]
+    });
+
+    $('#win-edit-xs').dialog({//设置系数窗口
+        title: '修改',
+        width: 390,
+        height: 240,
+        href:'src/edit_part_ratio.html',
+        buttons: [
+            {
+                text: '保存',
+                handler: function () {
+                    save_xs();
+                }
+            },
+            {
+                text: '关闭',
+                handler: function () {
+                    $('#win-edit-xs').dialog({closed: true});
+                }
+            }
+        ]
+    });
+
+
+    function save() {//保存修改的数据
+        var form = $('#win-edit-pj form');//获取表单
+        if (form.form("validate")) {
+            $.post(REQUEST_URL + "Import_Update_Price", {
+                        token: TOKEN,
+                        parkId: $('#tb-pjlb').datagrid('getSelected').id,
+                        price: $("#win-edit-pj .price").val(),
+                        because: $("#win-edit-pj .because").val()
+                    },
+                    function (data) {
+                        if (data.code === 0) {
+                            $('#win-edit-pj').dialog({closed: true});//关闭弹窗
+                            $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                            $('#tb-pjlb').datagrid('reload');//刷新数据
+                        }else{
+                            $.messager.alert('我的消息', '操作失败，请联系管理员！', 'error');//弹出信息
+                        }
+
+                    }
+            );
+        }
+    }
+
+    function save_xs() {
+        var selectMsg = $('#tb-pjlb').datagrid('getSelected');//获取行
+        var form = $('#win-edit-xs form');//获取表单
+        if (form.form("validate")) {
+            $.ajax({
+                type: "POST",
+                url: REQUEST_URL + "Import_Update_Radio",
+                data: $.param({
+                    'token': TOKEN,
+                    'priceId': selectMsg.priceId
+                }) + '&' + form.serialize(),
+                dataType: "json",
+                success: function (data) {
+                    if (data.errorDesc == "操作成功") {
+                        $('#win-edit-xs').dialog({closed: true});
+                        $.messager.alert('我的消息', '修改成功！', 'info');//弹出信息
+                        $('#tb-pjlb').datagrid('reload');//刷新表格
+                    }
+                }
+            });
+        }
+    }
+});
+</script>

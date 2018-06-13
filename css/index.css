@@ -1,0 +1,39 @@
+*{font-family:Tahoma,Verdana,'微软雅黑','新宋体';}
+
+
+
+.textbox{margin:0;padding:0 2px;box-sizing:content-box;height: 28px;}
+
+
+.mainTop{background:url(../images/bg.png) repeat-x;height:60px;background-size:300px;position:relative}
+.mainTop .center{position:absolute;clear:none;top:50%;left:50%;z-index:3;-webkit-transform:translate(-50%,-50%);width:100%}
+.mainTop .logo{float:left;background:url(../images/logo3.png) no-repeat;width:40px;height:40px;background-size:40px;margin-left:10px;margin-top:13px}
+.mainTop .title{float:left;color:#fff;font-size:24px;font-weight:700;line-height:60px;letter-spacing:2px;margin-left:10px;font-family:"微软雅黑"}
+.mainTop .logout{float:right;padding:24px 15px 0 0;color:#fff}
+.mainTop .logout a{color:#fff;text-decoration:none}
+.mainTop .logout a:hover{text-decoration:underline}
+
+.content .form-line{margin:10px 0;clear:both;height:30px}
+.content .form-line .onlyread{color:#40659f}
+.content .form-line input,.content .form-line select{width:150px;height:28px}
+.content .form-line label{width:103px;display:inline-block;text-align:right;margin-right: 4px;}
+.content .form-line label:after{content:":"}
+.content .form-line label.required:before{content:"*";color: #ff0000;margin-right: 4px;font-size: 12px;}
+.content .form-column{float:left;margin:5px 0;width:270px}
+.content .tip{background:#f1f1f1;border:1px solid #d7d7d7;margin-top:30px}
+
+/*图片上传*/
+#imgBox{text-align:left}
+.imgContainer{display:inline-block;width:70px;height:70px;margin-left:1%;position:relative;margin-top:30px;box-sizing:border-box}
+.imgContainer img{width:70px;;height:70px;cursor:pointer}
+.imgContainer p{position:absolute;bottom:-1px;right:0;top:-16px;height:20px;background:#666;text-align:center;line-height:20px;color:#fff;font-size:16px;font-weight:700;cursor:pointer;display:none;padding:0 4px;box-sizing:border-box}
+.imgContainer:hover p{display:block}
+#btn{cursor:pointer;font-size: 14px;text-decoration: underline;}
+#file{cursor:pointer;}
+
+/*选中与划过色值*/
+.accordion .accordion-header-selected{background:#E0ECFF}
+.tree-node-hover{background:#f2f2f2}
+.tree-node-selected{background:#eaf2ff}
+.datagrid-row-selected{background:#eaf2ff}
+.datagrid-row-over{background:#f2f2f2}
