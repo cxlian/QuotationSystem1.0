@@ -1,12 +1,6 @@
 /**
  * Created by SLAPP on 2018/4/19.
  */
-
-/*var REQUEST_URL="http://192.168.9.137:8080/WebService/";//请求地址*/
-/*var REQUEST_URL="http://192.168.9.50:8080/WebService/";*/
-var REQUEST_URL="//192.168.9.50:8080/WebService/";
-var REQUEST_URL_LOGIN="//192.168.9.50:8080/appService/login";
-
 var TOKEN;
 
 //获得地址文件名
@@ -67,7 +61,7 @@ function  formatterMoney(value, row) {
 
 /*错误跳转页面*/
 function errorToPage(){
-    location.href = '../page/login.html';
+/*    location.href = '../page/login.html';*/
 }
 
 //设置默认的datagrid参数

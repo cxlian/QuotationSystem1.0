@@ -1,0 +1,66 @@
+<form id="importFileForm" class="easyui-form" method="post" enctype="multipart/form-data">
+    <div class="content">
+        <div class="form-line">
+            <label>请选择文件</label>
+            <input class="easyui-filebox fileImport" id="fileImport" name="fileImport" type="text"/>
+        </div>
+    </div>
+    <div class="fileName" style='color:#0000ff;padding: 0 30px;'></div>
+</form>
+<!--
+    <div style="text-align:center;clear:both;margin:5px;">
+        <a href="javascript:;" class="easyui-linkbutton btn_ok" data-options="iconCls:'icon-ok'">上传</a>
+        <a href="javascript:;" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'">关闭</a>
+    </div>
+-->
+
+
+
+<script>
+    $(function(){
+       /* $(".fileImport").filebox("options");*/
+       $(".fileImport").filebox({
+           buttonText:"浏览...",
+           width:258
+       });
+
+        $(".btn_ok").click(function () {
+            var file = $(".fileImport").filebox("getValue");
+            if (!file) {
+                $.messager.alert('我的消息', '错误，请选择文件！', 'error');
+                return;
+            }
+            var fileType = file.substring(file.lastIndexOf('.'),file.length);
+            //这里限定上传文件文件类型必须为.xlsx，如果文件类型不符，提示错误信息
+            if(fileType == '.xlsx' || fileType == '.xls'){
+             /*   console.log(fileType);*/
+          /*      $(".fileName").html("本地路径:"+file)*/
+                var testDoc= $("input[name='fileImport']").attr("id");
+
+                $.ajaxFileUpload({
+                    url:REQUEST_URL +'Import_Machine_Exl',
+                    data:{
+                        token:TOKEN
+                    },
+                    type:'post',
+                    secureuri : false,
+                    fileElementId:testDoc,
+                    dataType:'json',
+                    success:function(data,status){
+                 /*       console.log(data);*/
+                       // console.log(status);
+                        /*console.log("成功");*/
+                      /*  if(data.code === 0){
+                            alert("成功")
+                        }*/
+
+                    },
+                    error:function(data, status, e){
+                     console.log("失败");
+                    }
+                });
+            }
+
+        });
+    });
+</script>

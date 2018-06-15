@@ -1,5 +1,8 @@
 <style>
     #allEquipList .tree-file{background:url(../themes/icons/zong.png) no-repeat 0 0}
+    .loading{width:100%;height:100%;position:fixed;top:0;left:0;    z-index: 100000;
+        opacity: 0.5;background-color:#fff}
+    .loading .pic{width:64px;height:64px;background:url(../images/loading.gif);position:absolute;top:0;bottom:0;left:0;right:0;margin:auto}
 </style>
 
 <div class="easyui-layout" style="height: 100%;">
@@ -16,6 +19,8 @@
             <div>
                 <a href="javascript:void(0);" class="easyui-linkbutton append" plain="true"
                    iconCls="icon-myadd">添加设备</a>
+                <a href="javascript:void(0);" class="easyui-linkbutton upFile" plain="true"
+                   iconCls="icon-edit">导入文件</a>
             </div>
         </div>
         <table id="overAllList"></table>
@@ -28,6 +33,9 @@
 <!--添加配件窗口-->
 <div id="win-add-item"></div>
 
+
+<!--导入文件窗口-->
+<div id="win-import-file"></div>
 <!--版本号
 <div id="win-add-zjbb"></div>-->
 <script>
@@ -71,6 +79,7 @@
 
     $(function(){
 
+
         function append(){
             $('#win-add-item').dialog({closed: false});
 /*            $('#win-add-zjbb').dialog({closed: false});*/
@@ -92,19 +101,24 @@
             }
         }
 
-        $('#panel-btn-qbzj').panel({
-            tools: [{
-                iconCls:'icon-add',
-                handler:function(){
-                    append();
-                }
-            },{
-                iconCls:'icon-remove',
-                handler:function(){
-                    remove();
-                }
-            }]
-        });
+
+        if($.cookie('role')==0){//如果是管理员
+            $('#panel-btn-qbzj').panel({
+                tools: [{
+                    iconCls:'icon-add',
+                    handler:function(){
+                        append();
+                    }
+                },{
+                    iconCls:'icon-remove',
+                    handler:function(){
+                        remove();
+                    }
+                }]
+            });
+        }
+
+
 
         $("#tool-overAllList .append").click(function () {
             var node = $('#allEquipList').tree('getSelected');
@@ -116,6 +130,46 @@
             }else{
                 $.messager.alert('我的消息', '请先选择一个整机！', 'error');
             }
+        });
+
+        $("#tool-overAllList .upFile").click(function () {
+            $("#win-import-file").dialog({ closed: false  });
+        });
+
+        $("#win-import-file").dialog({
+            title: '导入文件',
+            width: 430,
+            height: 200,
+            closed: true,
+            href: 'src/win-import-file.html',
+            onClose: function () {
+                $(this).dialog("destroy");
+            },
+            buttons: [
+                {
+                    text: '保存',
+                    iconCls:'icon-ok',
+                    handler: function () {
+                       importFile();
+                    }
+                },
+                {
+                    text: '关闭',
+                    iconCls:'icon-cancel',
+                    handler: function () {
+                        $('#win-import-file').dialog({closed: true});
+                    }
+                }
+            ]
+  /*          toolbar:[{
+                text:'保存',
+                iconCls:'icon-ok',
+                handler:function(){alert('保存')}
+            },{
+                text:'关闭',
+                iconCls:'icon-cancel',
+                handler:function(){$("#win-import-file").dialog("destroy");}
+            }]*/
         });
 
         $('#win-edit-zj').dialog({
@@ -186,6 +240,75 @@
         });
 
 
+        function importFile(){
 
+            var file =$("input[name='fileImport']")[0].files[0];
+            if (file == null) { $.messager.alert('我的消息', '错误，请选择文件！', 'error');return; }
+            var fileName = file.name;
+            var file_typename = fileName.substring(fileName.lastIndexOf('.'), fileName.length);
+            if(file_typename == '.xlsx' || file_typename == '.xls'){
+
+   /*             var formData = new FormData($("#importFileForm"))[0];
+                console.log(formData);*/
+                $("#importFileForm").form('submit', {
+                    url: REQUEST_URL +'Import_Machine_Exl',
+                /*    data: $("#importFileForm").serialize(),*/
+                    success: function (result) {
+               /*         console.log(result);
+                        console.log("成功");*/
+                      /*  alert("上传结束");*/
+                        $(".loading").fadeOut();
+                        $("#win-import-file").dialog({ closed: true  });
+                        $.messager.alert('我的消息', '导入成功！', 'infor');
+                        var selTab = $('#tabs').tabs('getSelected');
+                        selTab.panel('refresh');
+                    },
+                    onSubmit:function(){
+                        var loading='<div class="loading"><div class="pic"></div></div>';
+
+                        $("body").append(loading);
+
+                 /*       alert("上传开始");*/
+                    },
+                    error:function(){
+                        console.log("失败");
+                    }
+                });
+            }
+        /*    console.log($("input[name='fileImport']")[0].files[0]);*/
+           /* var file = $("#win-import-file .fileImport").filebox("getValue");
+            if (!file) {
+                $.messager.alert('我的消息', '错误，请选择文件！', 'error');
+                return;
+            }
+            var fileType = file.substring(file.lastIndexOf('.'),file.length);
+            //这里限定上传文件文件类型必须为.xlsx，如果文件类型不符，提示错误信息
+            if(fileType == '.xlsx' || fileType == '.xls'){
+                var testDoc= $("input[name='fileImport']").attr("id");
+
+                $.ajaxFileUpload({
+                    url:REQUEST_URL +'Import_Machine_Exl',
+                    data:{
+                        token:TOKEN
+                    },
+                    type:'post',
+                    secureuri : false,
+                    fileElementId:testDoc,
+                    dataType:'json',
+                    success:function(data,status){
+                        *//*       console.log(data);*//*
+                        // console.log(status);
+                        *//*console.log("成功");*//*
+                        *//*  if(data.code === 0){
+                         alert("成功")
+                         }*//*
+
+                    },
+                    error:function(data, status, e){
+                        console.log("失败");
+                    }
+                });
+            }*/
+        }
     })
 </script>

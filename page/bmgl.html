@@ -72,7 +72,8 @@
             columns: [
                 [
                     {field: "id", title: "ID", width: 100, align: "center",hidden:true},
-                    {field: "deptName", title: "部门名称", width: 200, align: "center"}
+                    {field: "deptName", title: "部门名称", width: 200, align: "center"},
+                    {field: "deptCode", title: "部门编码", width: 200, align: "center"}
                 ]
             ]
         });
@@ -101,7 +102,7 @@
         $('#win-add-bm').dialog({
             title: '新增',
             width:370,
-            heigh:120,
+            heigh:240,
             href:"src/win-add-bm.html",
             buttons: [
                 {
@@ -144,7 +145,7 @@
         $('#win-edit-bm').dialog({//设置修改窗口
             title: '修改',
             width:370,
-            heigh:120,
+            heigh:240,
             href:"src/win-edit-bm.html",
             buttons: [
                 {

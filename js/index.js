@@ -140,12 +140,12 @@ $(function () {
                     "text": "整机配置",
                     "url": "zjpz.html",
                     "iconCls": "icon-zhengji"
-                },
+                }/*,
                 {
                     "text": "测试编辑表",
                     "url": "test.html",
                     "iconCls": "icon-zhengji"
-                }
+                }*/
             ],
             onClick: function (node) {
                 toTabs(node);//点击跳转页面

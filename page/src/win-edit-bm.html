@@ -4,6 +4,10 @@
             <label class="required">部门名称</label>
             <input required="true" class="easyui-textbox departmentName" name="departmentName" data-options="validType:'maxLength[100]'" type="text"/>
         </div>
+        <div class="form-line">
+            <label class="required">部门编码</label>
+            <input required="true" class="easyui-textbox departmentCode" name="departmentCode"  type="text"/>
+        </div>
     </div>
 </form>
 
@@ -11,5 +15,6 @@
     $(function(){
         var selectMsg = $('#tb').datagrid('getSelected');
         $("#win-edit-bm .departmentName").val(selectMsg.deptName);
+        $("#win-edit-bm .departmentCode").val(selectMsg.deptCode);
     });
 </script>
